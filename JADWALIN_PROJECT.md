@@ -296,9 +296,9 @@ npx create-next-app@latest jadwalin --typescript --tailwind --app
 cd jadwalin
 
 # Install semua dependencies sekaligus
-npm install @prisma/client jsonwebtoken bcryptjs nodemailer cloudinary
+npm install @prisma/client @prisma/adapter-pg pg jsonwebtoken bcryptjs nodemailer cloudinary
 
-npm install -D prisma @types/jsonwebtoken @types/bcryptjs @types/nodemailer ts-node
+npm install -D prisma @types/jsonwebtoken @types/bcryptjs @types/nodemailer @types/pg ts-node
 
 # Init Prisma
 npx prisma init
@@ -535,16 +535,23 @@ Buat `src/lib/prisma.ts`:
 
 ```typescript
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createPrismaClient() {
+  const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL!,
+  });
+  return new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === "development" ? ["query"] : [],
   });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
@@ -554,10 +561,13 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 Buat `prisma/seed.ts`:
 
 ```typescript
+import "dotenv/config";
 import { PrismaClient, Role } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const owner = await prisma.user.upsert({
