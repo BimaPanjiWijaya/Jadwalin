@@ -1,4 +1,5 @@
 # Jadwalin — Booking & Scheduling Platform
+
 > Panduan lengkap pengerjaan dari setup hingga deployment
 > Stack: Next.js 16 · TypeScript · Prisma 7 · PostgreSQL · JWT · Telegram Bot · Tailwind CSS
 
@@ -24,18 +25,18 @@
 
 ## 1. Tech stack
 
-| Layer | Teknologi | Versi | Keterangan |
-|---|---|---|---|
-| Framework | Next.js | 16.2 (App Router) | Frontend + API Routes sekaligus |
-| Bahasa | TypeScript | 5.x | Type safety di seluruh codebase |
-| Styling | Tailwind CSS | 4.x | Utility-first CSS |
-| ORM | Prisma | 7.x | Type-safe, rust-free, lebih cepat |
-| Database | PostgreSQL | 15 | Via Supabase (free tier) |
-| Auth | **JWT manual** | — | jsonwebtoken + bcryptjs, dipahami dari dasar |
-| Email | Nodemailer | latest | Gmail SMTP, gratis |
-| Notifikasi | Telegram Bot API | — | Notif instan via bot, gratis |
-| File upload | Cloudinary | latest | Logo bisnis (free 25GB) |
-| Deploy | Vercel | — | Frontend + API Routes + Cron Jobs, semua di sini |
+| Layer       | Teknologi        | Versi             | Keterangan                                       |
+| ----------- | ---------------- | ----------------- | ------------------------------------------------ |
+| Framework   | Next.js          | 16.2 (App Router) | Frontend + API Routes sekaligus                  |
+| Bahasa      | TypeScript       | 5.x               | Type safety di seluruh codebase                  |
+| Styling     | Tailwind CSS     | 4.x               | Utility-first CSS                                |
+| ORM         | Prisma           | 7.x               | Type-safe, rust-free, lebih cepat                |
+| Database    | PostgreSQL       | 15                | Via Supabase (free tier)                         |
+| Auth        | **JWT manual**   | —                 | jsonwebtoken + bcryptjs, dipahami dari dasar     |
+| Email       | Nodemailer       | latest            | Gmail SMTP, gratis                               |
+| Notifikasi  | Telegram Bot API | —                 | Notif instan via bot, gratis                     |
+| File upload | Cloudinary       | latest            | Logo bisnis (free 25GB)                          |
+| Deploy      | Vercel           | —                 | Frontend + API Routes + Cron Jobs, semua di sini |
 
 ### Kenapa JWT manual, bukan library auth?
 
@@ -137,64 +138,77 @@ File ini berisi semua tipe yang dipakai berulang di seluruh project supaya tidak
 ```typescript
 // Tipe user session dari JWT
 export interface SessionUser {
-  id: string
-  email: string
-  role: 'CUSTOMER' | 'BUSINESS_OWNER'
+  id: string;
+  name: string;
+  email: string;
+  role: "CUSTOMER" | "BUSINESS_OWNER";
+  telegramChatId?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: "CUSTOMER" | "BUSINESS_OWNER";
+  telegramChatId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Tipe response bisnis
 export interface BusinessWithServices {
-  id: string
-  name: string
-  slug: string
-  category: string
-  description: string | null
-  address: string | null
-  phone: string | null
-  logoUrl: string | null
-  services: Service[]
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  description: string | null;
+  address: string | null;
+  phone: string | null;
+  logoUrl: string | null;
+  services: Service[];
 }
 
 export interface Service {
-  id: string
-  name: string
-  description: string | null
-  durationMinutes: number
-  price: number
+  id: string;
+  name: string;
+  description: string | null;
+  durationMinutes: number;
+  price: number;
 }
 
 // Tipe slot dengan status
 export interface SlotWithBookingCount {
-  id: string
-  slotDate: Date
-  startTime: Date
-  endTime: Date
-  maxCapacity: number
-  status: 'AVAILABLE' | 'FULL' | 'BLOCKED'
-  service: Service
-  _count: { bookings: number }
+  id: string;
+  slotDate: Date;
+  startTime: Date;
+  endTime: Date;
+  maxCapacity: number;
+  status: "AVAILABLE" | "FULL" | "BLOCKED";
+  service: Service;
+  _count: { bookings: number };
 }
 
 // Tipe booking lengkap
 export interface BookingWithDetails {
-  id: string
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW'
-  notes: string | null
-  bookedAt: Date
+  id: string;
+  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
+  notes: string | null;
+  bookedAt: Date;
   slot: {
-    slotDate: Date
-    startTime: Date
-    endTime: Date
-    business: { name: string; address: string | null }
-    service: { name: string; price: number }
-  }
-  customer: { name: string; email: string }
+    slotDate: Date;
+    startTime: Date;
+    endTime: Date;
+    business: { name: string; address: string | null };
+    service: { name: string; price: number };
+  };
+  customer: { name: string; email: string; phone: string | null };
 }
 
 // Tipe untuk API response generik
 export interface ApiResponse<T> {
-  data?: T
-  error?: string
+  data?: T;
+  error?: string;
 }
 ```
 
@@ -232,6 +246,7 @@ git config --global user.email "email@kamu.com"
 ```
 
 Buat repo baru di [github.com](https://github.com/new):
+
 - Repository name: `jadwalin`
 - Visibility: **Public** (supaya bisa dilihat recruiter)
 - Jangan centang "Add README" — kita akan push dari lokal
@@ -519,19 +534,19 @@ npx prisma studio
 Buat `src/lib/prisma.ts`:
 
 ```typescript
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+  prisma: PrismaClient | undefined;
+};
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query'] : [],
-  })
+    log: process.env.NODE_ENV === "development" ? ["query"] : [],
+  });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
 
 ### Buat seed data
@@ -539,72 +554,78 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 Buat `prisma/seed.ts`:
 
 ```typescript
-import { PrismaClient, Role } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import { PrismaClient, Role } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
   const owner = await prisma.user.upsert({
-    where: { email: 'rudi@jadwalin.id' },
+    where: { email: "rudi@jadwalin.id" },
     update: {},
     create: {
-      name: 'Pak Rudi',
-      email: 'rudi@jadwalin.id',
-      password: await bcrypt.hash('password123', 10),
+      name: "Pak Rudi",
+      email: "rudi@jadwalin.id",
+      password: await bcrypt.hash("password123", 10),
       role: Role.BUSINESS_OWNER,
-      phone: '08123456789',
+      phone: "08123456789",
     },
-  })
+  });
 
   await prisma.user.upsert({
-    where: { email: 'bima@jadwalin.id' },
+    where: { email: "bima@jadwalin.id" },
     update: {},
     create: {
-      name: 'Bima Panji',
-      email: 'bima@jadwalin.id',
-      password: await bcrypt.hash('password123', 10),
+      name: "Bima Panji",
+      email: "bima@jadwalin.id",
+      password: await bcrypt.hash("password123", 10),
       role: Role.CUSTOMER,
     },
-  })
+  });
 
   const business = await prisma.business.upsert({
-    where: { slug: 'barbershop-pak-rudi' },
+    where: { slug: "barbershop-pak-rudi" },
     update: {},
     create: {
       ownerId: owner.id,
-      name: 'Barbershop Pak Rudi',
-      slug: 'barbershop-pak-rudi',
-      category: 'barbershop',
-      description: 'Barbershop terpercaya sejak 2010',
-      address: 'Jl. Mawar No. 12, Yogyakarta',
-      phone: '08123456789',
+      name: "Barbershop Pak Rudi",
+      slug: "barbershop-pak-rudi",
+      category: "barbershop",
+      description: "Barbershop terpercaya sejak 2010",
+      address: "Jl. Mawar No. 12, Yogyakarta",
+      phone: "08123456789",
     },
-  })
+  });
 
   const service = await prisma.service.create({
     data: {
       businessId: business.id,
-      name: 'Potong rambut',
+      name: "Potong rambut",
       durationMinutes: 30,
       price: 35000,
     },
-  })
+  });
 
-  const today = new Date()
+  const today = new Date();
   const times = [
-    ['09:00', '09:30'], ['09:30', '10:00'], ['10:00', '10:30'],
-    ['10:30', '11:00'], ['11:00', '11:30'], ['13:00', '13:30'],
-    ['13:30', '14:00'], ['14:00', '14:30'], ['14:30', '15:00'],
-  ]
+    ["09:00", "09:30"],
+    ["09:30", "10:00"],
+    ["10:00", "10:30"],
+    ["10:30", "11:00"],
+    ["11:00", "11:30"],
+    ["13:00", "13:30"],
+    ["13:30", "14:00"],
+    ["14:00", "14:30"],
+    ["14:30", "15:00"],
+  ];
 
   for (let d = 0; d < 7; d++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() + d)
+    const date = new Date(today);
+    date.setDate(today.getDate() + d);
 
     for (const [start, end] of times) {
-      const [sh, sm] = start.split(':').map(Number)
-      const [eh, em] = end.split(':').map(Number)
+      const [sh, sm] = start.split(":").map(Number);
+      const [eh, em] = end.split(":").map(Number);
 
       await prisma.slot.create({
         data: {
@@ -615,16 +636,16 @@ async function main() {
           endTime: new Date(0, 0, 0, eh, em),
           maxCapacity: 1,
         },
-      })
+      });
     }
   }
 
-  console.log('Seed berhasil!')
+  console.log("Seed berhasil!");
 }
 
 main()
   .catch(console.error)
-  .finally(() => prisma.$disconnect())
+  .finally(() => prisma.$disconnect());
 ```
 
 Tambahkan ke `package.json`:
@@ -664,28 +685,28 @@ JWT_EXPIRES_IN="7d"
 ### Buat JWT helper — `src/lib/jwt.ts`
 
 ```typescript
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET!
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 export interface JwtPayload {
-  id: string
-  email: string
-  role: string
+  id: string;
+  email: string;
+  role: string;
 }
 
 // Buat token baru
 export function signToken(payload: JwtPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
 // Verifikasi token, return null kalau invalid
 export function verifyToken(token: string): JwtPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload
+    return jwt.verify(token, JWT_SECRET) as JwtPayload;
   } catch {
-    return null
+    return null;
   }
 }
 ```
@@ -693,44 +714,50 @@ export function verifyToken(token: string): JwtPayload | null {
 ### Buat auth helper — `src/lib/auth.ts`
 
 ```typescript
-import { cookies } from 'next/headers'
-import { verifyToken, JwtPayload } from '@/lib/jwt'
+import { cookies } from "next/headers";
+import { verifyToken, JwtPayload } from "@/lib/jwt";
 
 // Ambil session dari cookie di server component / API route
 export async function getSession(): Promise<JwtPayload | null> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('token')?.value
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
-  if (!token) return null
+  if (!token) return null;
 
-  return verifyToken(token)
+  return verifyToken(token);
 }
 ```
 
 ### Buat API register — `src/app/api/auth/register/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
-import { signToken } from '@/lib/jwt'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { signToken } from "@/lib/jwt";
 
 export async function POST(req: Request) {
-  const { name, email, password, role } = await req.json()
+  const { name, email, password, role } = await req.json();
 
   // Validasi input
   if (!name || !email || !password) {
-    return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 })
+    return NextResponse.json(
+      { error: "Semua field wajib diisi" },
+      { status: 400 },
+    );
   }
 
   // Cek email sudah terdaftar atau belum
-  const exists = await prisma.user.findUnique({ where: { email } })
+  const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) {
-    return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 400 })
+    return NextResponse.json(
+      { error: "Email sudah terdaftar" },
+      { status: 400 },
+    );
   }
 
   // Hash password — JANGAN simpan plain text
-  const hashedPassword = await bcrypt.hash(password, 10)
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // Simpan user ke database
   const user = await prisma.user.create({
@@ -738,117 +765,126 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
-      role: role === 'BUSINESS_OWNER' ? 'BUSINESS_OWNER' : 'CUSTOMER',
+      role: role === "BUSINESS_OWNER" ? "BUSINESS_OWNER" : "CUSTOMER",
     },
-  })
+  });
 
   // Buat JWT token
-  const token = signToken({ id: user.id, email: user.email, role: user.role })
+  const token = signToken({ id: user.id, email: user.email, role: user.role });
 
   // Kirim token via httpOnly cookie (aman dari XSS)
   const response = NextResponse.json(
     { id: user.id, name: user.name, email: user.email, role: user.role },
-    { status: 201 }
-  )
-  response.cookies.set('token', token, {
-    httpOnly: true,        // tidak bisa diakses JavaScript di browser
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    { status: 201 },
+  );
+  response.cookies.set("token", token, {
+    httpOnly: true, // tidak bisa diakses JavaScript di browser
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 hari
-    path: '/',
-  })
+    path: "/",
+  });
 
-  return response
+  return response;
 }
 ```
 
 ### Buat API login — `src/app/api/auth/login/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
-import { signToken } from '@/lib/jwt'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { signToken } from "@/lib/jwt";
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json()
+  const { email, password } = await req.json();
 
   if (!email || !password) {
-    return NextResponse.json({ error: 'Email dan password wajib diisi' }, { status: 400 })
+    return NextResponse.json(
+      { error: "Email dan password wajib diisi" },
+      { status: 400 },
+    );
   }
 
   // Cari user berdasarkan email
-  const user = await prisma.user.findUnique({ where: { email } })
+  const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     // Jangan bilang "email tidak ditemukan" — rawan enumerasi user
-    return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 })
+    return NextResponse.json(
+      { error: "Email atau password salah" },
+      { status: 401 },
+    );
   }
 
   // Bandingkan password dengan hash di database
-  const isValid = await bcrypt.compare(password, user.password)
+  const isValid = await bcrypt.compare(password, user.password);
   if (!isValid) {
-    return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 })
+    return NextResponse.json(
+      { error: "Email atau password salah" },
+      { status: 401 },
+    );
   }
 
   // Buat token baru
-  const token = signToken({ id: user.id, email: user.email, role: user.role })
+  const token = signToken({ id: user.id, email: user.email, role: user.role });
 
   const response = NextResponse.json({
     id: user.id,
     name: user.name,
     email: user.email,
     role: user.role,
-  })
-  response.cookies.set('token', token, {
+  });
+  response.cookies.set("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
-    path: '/',
-  })
+    path: "/",
+  });
 
-  return response
+  return response;
 }
 ```
 
 ### Buat API logout — `src/app/api/auth/logout/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
 export async function POST() {
-  const response = NextResponse.json({ message: 'Logout berhasil' })
+  const response = NextResponse.json({ message: "Logout berhasil" });
 
   // Hapus cookie token
-  response.cookies.set('token', '', {
+  response.cookies.set("token", "", {
     httpOnly: true,
-    maxAge: 0,    // langsung expired
-    path: '/',
-  })
+    maxAge: 0, // langsung expired
+    path: "/",
+  });
 
-  return response
+  return response;
 }
 ```
 
 ### Buat API me — `src/app/api/auth/me/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const session = await getSession()
+  const session = await getSession();
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const user = await prisma.user.findUnique({
     where: { id: session.id },
     select: { id: true, name: true, email: true, role: true, phone: true },
-  })
+  });
 
-  return NextResponse.json(user)
+  return NextResponse.json(user);
 }
 ```
 
@@ -859,40 +895,40 @@ export async function GET() {
 Buat `src/proxy.ts`:
 
 ```typescript
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/jwt'
+import { NextRequest, NextResponse } from "next/server";
+import { verifyToken } from "@/lib/jwt";
 
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
+  const { pathname } = req.nextUrl;
 
   // Ambil token dari cookie
-  const token = req.cookies.get('token')?.value
-  const session = token ? verifyToken(token) : null
+  const token = req.cookies.get("token")?.value;
+  const session = token ? verifyToken(token) : null;
 
-  const protectedRoutes = ['/my-bookings', '/book', '/dashboard']
-  const needsAuth = protectedRoutes.some(r => pathname.startsWith(r))
+  const protectedRoutes = ["/my-bookings", "/book", "/dashboard"];
+  const needsAuth = protectedRoutes.some((r) => pathname.startsWith(r));
 
   // Belum login tapi akses halaman protected → redirect ke login
   if (needsAuth && !session) {
-    return NextResponse.redirect(new URL('/login', req.url))
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   // Sudah login tapi buka halaman login/register → redirect ke home
-  if (session && (pathname === '/login' || pathname === '/register')) {
-    return NextResponse.redirect(new URL('/', req.url))
+  if (session && (pathname === "/login" || pathname === "/register")) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   // Dashboard hanya untuk BUSINESS_OWNER
-  if (pathname.startsWith('/dashboard') && session?.role !== 'BUSINESS_OWNER') {
-    return NextResponse.redirect(new URL('/', req.url))
+  if (pathname.startsWith("/dashboard") && session?.role !== "BUSINESS_OWNER") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-}
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
 ```
 
 ### Cara pakai session di halaman
@@ -926,6 +962,7 @@ export async function POST(req: Request) {
 ## 8. Setup notifikasi — Email + Telegram Bot
 
 Jadwalin menggunakan dua channel notifikasi sekaligus:
+
 - **Email** via Gmail SMTP — untuk dokumentasi resmi dan user yang tidak pakai Telegram
 - **Telegram Bot** — untuk notifikasi instan yang langsung terbaca
 
@@ -971,26 +1008,26 @@ Atau bisa lebih otomatis dengan Telegram webhook (opsional, bisa ditambahkan nan
 ### Buat `src/lib/mailer.ts`
 
 ```typescript
-import nodemailer from 'nodemailer'
+import nodemailer from "nodemailer";
 
 export const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
-})
+});
 
 export async function sendBookingConfirmationEmail(
   to: string,
   data: {
-    customerName: string
-    businessName: string
-    serviceName: string
-    date: string
-    time: string
-    bookingCode: string
-  }
+    customerName: string;
+    businessName: string;
+    serviceName: string;
+    date: string;
+    time: string;
+    bookingCode: string;
+  },
 ) {
   await transporter.sendMail({
     from: `"Jadwalin" <${process.env.GMAIL_USER}>`,
@@ -1011,17 +1048,17 @@ export async function sendBookingConfirmationEmail(
         <p style="color:#999;font-size:12px;">— Tim Jadwalin</p>
       </div>
     `,
-  })
+  });
 }
 
 export async function sendReminderEmail(
   to: string,
   data: {
-    customerName: string
-    businessName: string
-    date: string
-    time: string
-  }
+    customerName: string;
+    businessName: string;
+    date: string;
+    time: string;
+  },
 ) {
   await transporter.sendMail({
     from: `"Jadwalin" <${process.env.GMAIL_USER}>`,
@@ -1039,7 +1076,7 @@ export async function sendReminderEmail(
         <p style="color:#999;font-size:12px;margin-top:24px;">— Tim Jadwalin</p>
       </div>
     `,
-  })
+  });
 }
 ```
 
@@ -1048,27 +1085,27 @@ export async function sendReminderEmail(
 Tidak perlu install library — cukup pakai `fetch` bawaan Next.js.
 
 ```typescript
-const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`
+const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 
 // Kirim pesan teks ke user via chat_id
 export async function sendTelegramMessage(
   chatId: string,
-  text: string
+  text: string,
 ): Promise<void> {
   const res = await fetch(`${TELEGRAM_API}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       chat_id: chatId,
       text,
-      parse_mode: 'Markdown',
+      parse_mode: "Markdown",
     }),
-  })
+  });
 
   if (!res.ok) {
-    const err = await res.json()
-    console.error('Telegram error:', err)
-    throw new Error(`Telegram gagal: ${err.description}`)
+    const err = await res.json();
+    console.error("Telegram error:", err);
+    throw new Error(`Telegram gagal: ${err.description}`);
   }
 }
 
@@ -1076,13 +1113,13 @@ export async function sendTelegramMessage(
 export async function sendBookingConfirmationTelegram(
   chatId: string,
   data: {
-    customerName: string
-    businessName: string
-    serviceName: string
-    date: string
-    time: string
-    bookingCode: string
-  }
+    customerName: string;
+    businessName: string;
+    serviceName: string;
+    date: string;
+    time: string;
+    bookingCode: string;
+  },
 ) {
   const text = `
 ✅ *Booking Dikonfirmasi!*
@@ -1096,20 +1133,20 @@ Halo ${data.customerName}, booking kamu sudah berhasil.
 🔖 Kode: \`${data.bookingCode}\`
 
 Sampai jumpa! 👋
-  `.trim()
+  `.trim();
 
-  await sendTelegramMessage(chatId, text)
+  await sendTelegramMessage(chatId, text);
 }
 
 // Notifikasi reminder H-1
 export async function sendReminderTelegram(
   chatId: string,
   data: {
-    customerName: string
-    businessName: string
-    date: string
-    time: string
-  }
+    customerName: string;
+    businessName: string;
+    date: string;
+    time: string;
+  },
 ) {
   const text = `
 ⏰ *Reminder Booking Besok!*
@@ -1121,51 +1158,56 @@ Halo ${data.customerName}, jangan lupa booking kamu besok ya!
 🕐 ${data.time}
 
 Sampai jumpa! 👋
-  `.trim()
+  `.trim();
 
-  await sendTelegramMessage(chatId, text)
+  await sendTelegramMessage(chatId, text);
 }
 ```
 
 ### Buat API untuk simpan Telegram Chat ID — `src/app/api/profile/telegram/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // POST /api/profile/telegram
 // Body: { telegramChatId: "123456789" }
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { telegramChatId } = await req.json()
+  const { telegramChatId } = await req.json();
 
   if (!telegramChatId) {
-    return NextResponse.json({ error: 'telegramChatId wajib diisi' }, { status: 400 })
+    return NextResponse.json(
+      { error: "telegramChatId wajib diisi" },
+      { status: 400 },
+    );
   }
 
   const updated = await prisma.user.update({
     where: { id: session.id },
     data: { telegramChatId },
     select: { id: true, name: true, telegramChatId: true },
-  })
+  });
 
-  return NextResponse.json(updated)
+  return NextResponse.json(updated);
 }
 
 // DELETE /api/profile/telegram — disconnect Telegram
 export async function DELETE(req: Request) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await prisma.user.update({
     where: { id: session.id },
     data: { telegramChatId: null },
-  })
+  });
 
-  return NextResponse.json({ message: 'Telegram berhasil diputus' })
+  return NextResponse.json({ message: "Telegram berhasil diputus" });
 }
 ```
 
@@ -1175,34 +1217,34 @@ Webhook ini dipanggil Telegram setiap kali user kirim pesan ke bot.
 Saat user ketik `/start`, bot langsung balas dengan chat_id mereka.
 
 ```typescript
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const body = await req.json()
+  const body = await req.json();
 
-  const message = body?.message
-  if (!message) return NextResponse.json({ ok: true })
+  const message = body?.message;
+  if (!message) return NextResponse.json({ ok: true });
 
-  const chatId = message.chat.id.toString()
-  const text = message.text || ''
+  const chatId = message.chat.id.toString();
+  const text = message.text || "";
 
   // Kalau user ketik /start, balas dengan chat_id mereka
-  if (text.startsWith('/start')) {
+  if (text.startsWith("/start")) {
     await fetch(
       `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
           text: `Halo! 👋 Selamat datang di Jadwalin Bot.\n\nChat ID kamu adalah:\n\`${chatId}\`\n\nCopy angka di atas dan paste di halaman profil Jadwalin kamu untuk mengaktifkan notifikasi Telegram.`,
-          parse_mode: 'Markdown',
+          parse_mode: "Markdown",
         }),
-      }
-    )
+      },
+    );
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true });
 }
 ```
 
@@ -1210,6 +1252,97 @@ export async function POST(req: Request) {
 
 Jalankan perintah ini **sekali saja setelah deploy ke Vercel** — bukan sekarang.
 Langkah lengkapnya ada di bagian Deployment (bagian 12).
+
+---
+
+## 8a. Setup file upload — Cloudinary
+
+Cloudinary digunakan untuk upload logo bisnis. Free tier sudah cukup (25GB).
+
+### Daftar & setup akun
+
+1. Buka [cloudinary.com](https://cloudinary.com) → **Sign Up** (gratis)
+2. Setelah login, buka **Dashboard**
+3. Copy tiga nilai berikut dari bagian **Product Environment Credentials**:
+   - **Cloud name**
+   - **API key**
+   - **API secret**
+
+```env
+# Tambahkan ke .env.local
+CLOUDINARY_CLOUD_NAME="nama-cloud-kamu"
+CLOUDINARY_API_KEY="123456789012345"
+CLOUDINARY_API_SECRET="xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+### Buat helper — `src/lib/cloudinary.ts`
+
+```typescript
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Upload gambar dari buffer, return URL publik
+export async function uploadImage(
+  buffer: Buffer,
+  folder: string = "jadwalin"
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream({ folder, resource_type: "image" }, (error, result) => {
+        if (error || !result) return reject(error);
+        resolve(result.secure_url);
+      })
+      .end(buffer);
+  });
+}
+
+// Hapus gambar berdasarkan public_id
+export async function deleteImage(publicId: string): Promise<void> {
+  await cloudinary.uploader.destroy(publicId);
+}
+```
+
+### Cara pakai di API route
+
+```typescript
+// Contoh: upload logo bisnis di src/app/api/businesses/[id]/logo/route.ts
+import { uploadImage } from "@/lib/cloudinary";
+
+export async function POST(req: Request) {
+  const formData = await req.formData();
+  const file = formData.get("logo") as File;
+
+  if (!file) {
+    return NextResponse.json({ error: "File wajib diupload" }, { status: 400 });
+  }
+
+  // Validasi tipe file
+  if (!file.type.startsWith("image/")) {
+    return NextResponse.json({ error: "Hanya file gambar yang diizinkan" }, { status: 400 });
+  }
+
+  // Validasi ukuran (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    return NextResponse.json({ error: "Ukuran file maksimal 2MB" }, { status: 400 });
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const logoUrl = await uploadImage(buffer, "jadwalin/logos");
+
+  // Simpan URL ke database
+  await prisma.business.update({
+    where: { id: params.id },
+    data: { logoUrl },
+  });
+
+  return NextResponse.json({ logoUrl });
+}
+```
 
 ---
 
@@ -1248,13 +1381,13 @@ Langkah lengkapnya ada di bagian Deployment (bagian 12).
 **API businesses — `src/app/api/businesses/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 // GET /api/businesses?category=barbershop
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const category = searchParams.get('category')
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get("category");
 
   const businesses = await prisma.business.findMany({
     where: {
@@ -1265,47 +1398,62 @@ export async function GET(req: Request) {
       services: { where: { isActive: true } },
       _count: { select: { slots: true } },
     },
-    orderBy: { createdAt: 'desc' },
-  })
+    orderBy: { createdAt: "desc" },
+  });
 
-  return NextResponse.json(businesses)
+  return NextResponse.json(businesses);
 }
 
 // POST /api/businesses — buat bisnis baru (business owner)
 export async function POST(req: Request) {
-  const { getSession } = await import('@/lib/auth')
-  const session = await getSession()
-  if (!session || session.role !== 'BUSINESS_OWNER') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const { getSession } = await import("@/lib/auth");
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { name, slug, category, description, address, phone } = await req.json()
+  const { name, slug, category, description, address, phone } =
+    await req.json();
 
   if (!name || !slug || !category) {
-    return NextResponse.json({ error: 'name, slug, dan category wajib diisi' }, { status: 400 })
+    return NextResponse.json(
+      { error: "name, slug, dan category wajib diisi" },
+      { status: 400 },
+    );
   }
 
-  const exists = await prisma.business.findUnique({ where: { slug } })
+  const exists = await prisma.business.findUnique({ where: { slug } });
   if (exists) {
-    return NextResponse.json({ error: 'Slug sudah dipakai' }, { status: 400 })
+    return NextResponse.json({ error: "Slug sudah dipakai" }, { status: 400 });
   }
 
   const business = await prisma.business.create({
-    data: { ownerId: session.id, name, slug, category, description, address, phone },
-  })
+    data: {
+      ownerId: session.id,
+      name,
+      slug,
+      category,
+      description,
+      address,
+      phone,
+    },
+  });
 
-  return NextResponse.json(business, { status: 201 })
+  return NextResponse.json(business, { status: 201 });
 }
 ```
 
 **API business detail — `src/app/api/businesses/[id]/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 // GET /api/businesses/[id] — bisa pakai id atau slug
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
   const business = await prisma.business.findFirst({
     where: {
       OR: [{ id: params.id }, { slug: params.id }],
@@ -1315,87 +1463,101 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       services: { where: { isActive: true } },
       owner: { select: { name: true, email: true } },
     },
-  })
+  });
 
   if (!business) {
-    return NextResponse.json({ error: 'Bisnis tidak ditemukan' }, { status: 404 })
+    return NextResponse.json(
+      { error: "Bisnis tidak ditemukan" },
+      { status: 404 },
+    );
   }
 
-  return NextResponse.json(business)
+  return NextResponse.json(business);
 }
 
 // PATCH /api/businesses/[id] — edit profil bisnis
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { getSession } = await import('@/lib/auth')
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  const { getSession } = await import("@/lib/auth");
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const business = await prisma.business.findUnique({ where: { id: params.id } })
+  const business = await prisma.business.findUnique({
+    where: { id: params.id },
+  });
   if (!business || business.ownerId !== session.id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const data = await req.json()
+  const data = await req.json();
   const updated = await prisma.business.update({
     where: { id: params.id },
     data,
-  })
+  });
 
-  return NextResponse.json(updated)
+  return NextResponse.json(updated);
 }
 ```
 
 **API slots — `src/app/api/slots/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // GET /api/slots?businessId=xxx&date=2025-06-14
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const businessId = searchParams.get('businessId')
-  const date = searchParams.get('date')
+  const { searchParams } = new URL(req.url);
+  const businessId = searchParams.get("businessId");
+  const date = searchParams.get("date");
 
   if (!businessId || !date) {
-    return NextResponse.json({ error: 'businessId dan date wajib diisi' }, { status: 400 })
+    return NextResponse.json(
+      { error: "businessId dan date wajib diisi" },
+      { status: 400 },
+    );
   }
 
-  const slotDate = new Date(date)
-  const nextDate = new Date(slotDate)
-  nextDate.setDate(nextDate.getDate() + 1)
+  const slotDate = new Date(date);
+  const nextDate = new Date(slotDate);
+  nextDate.setDate(nextDate.getDate() + 1);
 
   const slots = await prisma.slot.findMany({
     where: {
       businessId,
       slotDate: { gte: slotDate, lt: nextDate },
-      status: { not: 'BLOCKED' },
+      status: { not: "BLOCKED" },
     },
     include: {
       service: true,
       _count: { select: { bookings: true } },
     },
-    orderBy: { startTime: 'asc' },
-  })
+    orderBy: { startTime: "asc" },
+  });
 
-  return NextResponse.json(slots)
+  return NextResponse.json(slots);
 }
 
 // POST /api/slots — buat slot baru (business owner)
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session || session.role !== 'BUSINESS_OWNER') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { businessId, serviceId, slotDate, startTime, endTime, maxCapacity } = await req.json()
+  const { businessId, serviceId, slotDate, startTime, endTime, maxCapacity } =
+    await req.json();
 
   // Verifikasi bisnis milik owner ini
   const business = await prisma.business.findFirst({
     where: { id: businessId, ownerId: session.id },
-  })
-  if (!business) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  });
+  if (!business)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const slot = await prisma.slot.create({
     data: {
@@ -1406,131 +1568,154 @@ export async function POST(req: Request) {
       endTime: new Date(`1970-01-01T${endTime}:00`),
       maxCapacity: maxCapacity || 1,
     },
-  })
+  });
 
-  return NextResponse.json(slot, { status: 201 })
+  return NextResponse.json(slot, { status: 201 });
 }
 ```
 
 **API slot update — `src/app/api/slots/[id]/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // PATCH /api/slots/[id] — block atau unblock slot
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const session = await getSession()
-  if (!session || session.role !== 'BUSINESS_OWNER') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { status } = await req.json()
+  const { status } = await req.json();
 
   // Pastikan slot milik bisnis yang dimiliki owner ini
   const slot = await prisma.slot.findFirst({
     where: { id: params.id, business: { ownerId: session.id } },
-  })
-  if (!slot) return NextResponse.json({ error: 'Slot tidak ditemukan' }, { status: 404 })
+  });
+  if (!slot)
+    return NextResponse.json(
+      { error: "Slot tidak ditemukan" },
+      { status: 404 },
+    );
 
   const updated = await prisma.slot.update({
     where: { id: params.id },
     data: { status },
-  })
+  });
 
-  return NextResponse.json(updated)
+  return NextResponse.json(updated);
 }
 
 // DELETE /api/slots/[id] — hapus slot (hanya kalau belum ada booking)
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const session = await getSession()
-  if (!session || session.role !== 'BUSINESS_OWNER') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const slot = await prisma.slot.findFirst({
     where: { id: params.id, business: { ownerId: session.id } },
     include: { _count: { select: { bookings: true } } },
-  })
+  });
 
-  if (!slot) return NextResponse.json({ error: 'Slot tidak ditemukan' }, { status: 404 })
+  if (!slot)
+    return NextResponse.json(
+      { error: "Slot tidak ditemukan" },
+      { status: 404 },
+    );
   if (slot._count.bookings > 0) {
-    return NextResponse.json({ error: 'Tidak bisa hapus slot yang sudah ada booking' }, { status: 400 })
+    return NextResponse.json(
+      { error: "Tidak bisa hapus slot yang sudah ada booking" },
+      { status: 400 },
+    );
   }
 
-  await prisma.slot.delete({ where: { id: params.id } })
-  return NextResponse.json({ message: 'Slot berhasil dihapus' })
+  await prisma.slot.delete({ where: { id: params.id } });
+  return NextResponse.json({ message: "Slot berhasil dihapus" });
 }
 ```
 
 **API services — `src/app/api/services/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // GET /api/services?businessId=xxx
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const businessId = searchParams.get('businessId')
+  const { searchParams } = new URL(req.url);
+  const businessId = searchParams.get("businessId");
   if (!businessId) {
-    return NextResponse.json({ error: 'businessId wajib diisi' }, { status: 400 })
+    return NextResponse.json(
+      { error: "businessId wajib diisi" },
+      { status: 400 },
+    );
   }
 
   const services = await prisma.service.findMany({
     where: { businessId, isActive: true },
-    orderBy: { name: 'asc' },
-  })
+    orderBy: { name: "asc" },
+  });
 
-  return NextResponse.json(services)
+  return NextResponse.json(services);
 }
 
 // POST /api/services — tambah layanan baru
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session || session.role !== 'BUSINESS_OWNER') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { businessId, name, description, durationMinutes, price } = await req.json()
+  const { businessId, name, description, durationMinutes, price } =
+    await req.json();
 
   const business = await prisma.business.findFirst({
     where: { id: businessId, ownerId: session.id },
-  })
-  if (!business) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  });
+  if (!business)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const service = await prisma.service.create({
     data: { businessId, name, description, durationMinutes, price: price || 0 },
-  })
+  });
 
-  return NextResponse.json(service, { status: 201 })
+  return NextResponse.json(service, { status: 201 });
 }
 ```
 
 **API bookings GET — tambahkan ke `src/app/api/bookings/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // GET /api/bookings?customerId=xxx — riwayat customer
 // GET /api/bookings?businessId=xxx&date=2025-06-14 — antrian bisnis
 export async function GET(req: Request) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(req.url)
-  const customerId = searchParams.get('customerId')
-  const businessId = searchParams.get('businessId')
-  const date = searchParams.get('date')
+  const { searchParams } = new URL(req.url);
+  const customerId = searchParams.get("customerId");
+  const businessId = searchParams.get("businessId");
+  const date = searchParams.get("date");
 
   if (customerId) {
     // Customer lihat riwayat booking sendiri
     if (customerId !== session.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const bookings = await prisma.booking.findMany({
@@ -1538,21 +1723,22 @@ export async function GET(req: Request) {
       include: {
         slot: { include: { business: true, service: true } },
       },
-      orderBy: { bookedAt: 'desc' },
-    })
-    return NextResponse.json(bookings)
+      orderBy: { bookedAt: "desc" },
+    });
+    return NextResponse.json(bookings);
   }
 
   if (businessId && date) {
     // Business owner lihat booking masuk per tanggal
     const business = await prisma.business.findFirst({
       where: { id: businessId, ownerId: session.id },
-    })
-    if (!business) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    });
+    if (!business)
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const slotDate = new Date(date)
-    const nextDate = new Date(slotDate)
-    nextDate.setDate(nextDate.getDate() + 1)
+    const slotDate = new Date(date);
+    const nextDate = new Date(slotDate);
+    nextDate.setDate(nextDate.getDate() + 1);
 
     const bookings = await prisma.booking.findMany({
       where: {
@@ -1565,64 +1751,75 @@ export async function GET(req: Request) {
         customer: { select: { name: true, email: true, phone: true } },
         slot: { include: { service: true } },
       },
-      orderBy: { slot: { startTime: 'asc' } },
-    })
-    return NextResponse.json(bookings)
+      orderBy: { slot: { startTime: "asc" } },
+    });
+    return NextResponse.json(bookings);
   }
 
-  return NextResponse.json({ error: 'customerId atau businessId+date wajib diisi' }, { status: 400 })
+  return NextResponse.json(
+    { error: "customerId atau businessId+date wajib diisi" },
+    { status: 400 },
+  );
 }
 ```
 
 **API booking update — `src/app/api/bookings/[id]/route.ts`:**
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // PATCH /api/bookings/[id] — update status
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { status } = await req.json()
+  const { status } = await req.json();
 
   const booking = await prisma.booking.findUnique({
     where: { id: params.id },
     include: { slot: { include: { business: true } } },
-  })
+  });
 
-  if (!booking) return NextResponse.json({ error: 'Booking tidak ditemukan' }, { status: 404 })
+  if (!booking)
+    return NextResponse.json(
+      { error: "Booking tidak ditemukan" },
+      { status: 404 },
+    );
 
   // Customer hanya bisa batalkan booking sendiri
-  if (session.role === 'CUSTOMER') {
-    if (booking.customerId !== session.id || status !== 'CANCELLED') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (session.role === "CUSTOMER") {
+    if (booking.customerId !== session.id || status !== "CANCELLED") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   }
 
   // Business owner hanya bisa update booking di bisnisnya
-  if (session.role === 'BUSINESS_OWNER') {
+  if (session.role === "BUSINESS_OWNER") {
     if (booking.slot.business.ownerId !== session.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   }
 
   const updated = await prisma.booking.update({
     where: { id: params.id },
     data: { status },
-  })
+  });
 
   // Kalau dibatalkan, buka kembali slot
-  if (status === 'CANCELLED') {
+  if (status === "CANCELLED") {
     await prisma.slot.update({
       where: { id: booking.slotId },
-      data: { status: 'AVAILABLE' },
-    })
+      data: { status: "AVAILABLE" },
+    });
   }
 
-  return NextResponse.json(updated)
+  return NextResponse.json(updated);
 }
 ```
 
@@ -1630,48 +1827,56 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 ```typescript
 // src/app/api/bookings/route.ts
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { slotId, notes } = await req.json()
+  const { slotId, notes } = await req.json();
 
   try {
     const booking = await prisma.$transaction(async (tx) => {
       const slot = await tx.slot.findUnique({
         where: { id: slotId },
         include: { _count: { select: { bookings: true } } },
-      })
+      });
 
-      if (!slot) throw new Error('Slot tidak ditemukan')
-      if (slot.status === 'BLOCKED') throw new Error('Slot tidak tersedia')
-      if (slot._count.bookings >= slot.maxCapacity) throw new Error('Slot sudah penuh')
+      if (!slot) throw new Error("Slot tidak ditemukan");
+      if (slot.status === "BLOCKED") throw new Error("Slot tidak tersedia");
+      if (slot._count.bookings >= slot.maxCapacity)
+        throw new Error("Slot sudah penuh");
 
       const existing = await tx.booking.findUnique({
         where: { slotId_customerId: { slotId, customerId: session.id } },
-      })
-      if (existing) throw new Error('Kamu sudah booking slot ini')
+      });
+      if (existing) throw new Error("Kamu sudah booking slot ini");
 
       const newBooking = await tx.booking.create({
         data: { slotId, customerId: session.id, notes },
-        include: { slot: { include: { business: true, service: true } }, customer: true },
-      })
+        include: {
+          slot: { include: { business: true, service: true } },
+          customer: true,
+        },
+      });
 
-      const totalBookings = slot._count.bookings + 1
+      const totalBookings = slot._count.bookings + 1;
       if (totalBookings >= slot.maxCapacity) {
-        await tx.slot.update({ where: { id: slotId }, data: { status: 'FULL' } })
+        await tx.slot.update({
+          where: { id: slotId },
+          data: { status: "FULL" },
+        });
       }
 
-      return newBooking
-    })
+      return newBooking;
+    });
 
-    return NextResponse.json(booking, { status: 201 })
+    return NextResponse.json(booking, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 })
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
 ```
@@ -1695,41 +1900,53 @@ Fitur ini sangat berguna buat bisnis yang mau buat slot sehari penuh sekaligus,
 tanpa harus input satu per satu.
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 // POST /api/slots/generate
 // Body: { businessId, serviceId, date, openTime, closeTime, intervalMinutes }
 // Contoh: { openTime: "09:00", closeTime: "17:00", intervalMinutes: 30 }
 // → generate slot 09:00, 09:30, 10:00, ... sampai 16:30
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session || session.role !== 'BUSINESS_OWNER') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { businessId, serviceId, date, openTime, closeTime, intervalMinutes = 30 } = await req.json()
+  const {
+    businessId,
+    serviceId,
+    date,
+    openTime,
+    closeTime,
+    intervalMinutes = 30,
+  } = await req.json();
 
   const business = await prisma.business.findFirst({
     where: { id: businessId, ownerId: session.id },
-  })
-  if (!business) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  });
+  if (!business)
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // Parse jam buka dan tutup
-  const [openH, openM] = openTime.split(':').map(Number)
-  const [closeH, closeM] = closeTime.split(':').map(Number)
+  const [openH, openM] = openTime.split(":").map(Number);
+  const [closeH, closeM] = closeTime.split(":").map(Number);
 
-  const openMinutes = openH * 60 + openM
-  const closeMinutes = closeH * 60 + closeM
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
 
   // Generate semua slot dari jam buka ke jam tutup
-  const slotsToCreate = []
-  for (let start = openMinutes; start + intervalMinutes <= closeMinutes; start += intervalMinutes) {
-    const startH = Math.floor(start / 60)
-    const startM = start % 60
-    const endH = Math.floor((start + intervalMinutes) / 60)
-    const endM = (start + intervalMinutes) % 60
+  const slotsToCreate = [];
+  for (
+    let start = openMinutes;
+    start + intervalMinutes <= closeMinutes;
+    start += intervalMinutes
+  ) {
+    const startH = Math.floor(start / 60);
+    const startM = start % 60;
+    const endH = Math.floor((start + intervalMinutes) / 60);
+    const endM = (start + intervalMinutes) % 60;
 
     slotsToCreate.push({
       businessId,
@@ -1738,13 +1955,13 @@ export async function POST(req: Request) {
       startTime: new Date(0, 0, 0, startH, startM),
       endTime: new Date(0, 0, 0, endH, endM),
       maxCapacity: 1,
-    })
+    });
   }
 
   // Insert semua sekaligus dengan createMany
-  await prisma.slot.createMany({ data: slotsToCreate })
+  await prisma.slot.createMany({ data: slotsToCreate });
 
-  return NextResponse.json({ created: slotsToCreate.length }, { status: 201 })
+  return NextResponse.json({ created: slotsToCreate.length }, { status: 201 });
 }
 ```
 
@@ -1774,33 +1991,35 @@ export async function POST(req: Request) {
 
 ```typescript
 // src/app/api/bookings/route.ts
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
-import { sendBookingConfirmationEmail } from '@/lib/mailer'
-import { sendBookingConfirmationTelegram } from '@/lib/telegram'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { sendBookingConfirmationEmail } from "@/lib/mailer";
+import { sendBookingConfirmationTelegram } from "@/lib/telegram";
 
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { slotId, notes } = await req.json()
+  const { slotId, notes } = await req.json();
 
   try {
     const booking = await prisma.$transaction(async (tx) => {
       const slot = await tx.slot.findUnique({
         where: { id: slotId },
         include: { _count: { select: { bookings: true } } },
-      })
+      });
 
-      if (!slot) throw new Error('Slot tidak ditemukan')
-      if (slot.status === 'BLOCKED') throw new Error('Slot tidak tersedia')
-      if (slot._count.bookings >= slot.maxCapacity) throw new Error('Slot sudah penuh')
+      if (!slot) throw new Error("Slot tidak ditemukan");
+      if (slot.status === "BLOCKED") throw new Error("Slot tidak tersedia");
+      if (slot._count.bookings >= slot.maxCapacity)
+        throw new Error("Slot sudah penuh");
 
       const existing = await tx.booking.findUnique({
         where: { slotId_customerId: { slotId, customerId: session.id } },
-      })
-      if (existing) throw new Error('Kamu sudah booking slot ini')
+      });
+      if (existing) throw new Error("Kamu sudah booking slot ini");
 
       const newBooking = await tx.booking.create({
         data: { slotId, customerId: session.id, notes },
@@ -1808,38 +2027,48 @@ export async function POST(req: Request) {
           slot: { include: { business: true, service: true } },
           customer: true,
         },
-      })
+      });
 
-      const totalBookings = slot._count.bookings + 1
+      const totalBookings = slot._count.bookings + 1;
       if (totalBookings >= slot.maxCapacity) {
-        await tx.slot.update({ where: { id: slotId }, data: { status: 'FULL' } })
+        await tx.slot.update({
+          where: { id: slotId },
+          data: { status: "FULL" },
+        });
       }
 
-      return newBooking
-    })
+      return newBooking;
+    });
 
     // Siapkan data notifikasi
     const notifData = {
       customerName: booking.customer.name,
       businessName: booking.slot.business.name,
       serviceName: booking.slot.service.name,
-      date: booking.slot.slotDate.toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      date: booking.slot.slotDate.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       }),
-      time: booking.slot.startTime.toLocaleTimeString('id-ID', {
-        hour: '2-digit', minute: '2-digit',
+      time: booking.slot.startTime.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
       }),
       bookingCode: `JDW-${booking.id.slice(0, 6).toUpperCase()}`,
-    }
+    };
 
     // Kirim email konfirmasi (selalu)
-    sendBookingConfirmationEmail(booking.customer.email, notifData)
-      .catch(err => console.error('Email gagal:', err))
+    sendBookingConfirmationEmail(booking.customer.email, notifData).catch(
+      (err) => console.error("Email gagal:", err),
+    );
 
     // Kirim Telegram (kalau user sudah connect)
     if (booking.customer.telegramChatId) {
-      sendBookingConfirmationTelegram(booking.customer.telegramChatId, notifData)
-        .catch(err => console.error('Telegram gagal:', err))
+      sendBookingConfirmationTelegram(
+        booking.customer.telegramChatId,
+        notifData,
+      ).catch((err) => console.error("Telegram gagal:", err));
     }
 
     // Log notifikasi
@@ -1847,15 +2076,15 @@ export async function POST(req: Request) {
       data: {
         bookingId: booking.id,
         userId: session.id,
-        channel: booking.customer.telegramChatId ? 'ALL' : 'EMAIL',
-        type: 'BOOKING_CONFIRMED',
-        status: 'QUEUED',
+        channel: booking.customer.telegramChatId ? "ALL" : "EMAIL",
+        type: "BOOKING_CONFIRMED",
+        status: "QUEUED",
       },
-    })
+    });
 
-    return NextResponse.json(booking, { status: 201 })
+    return NextResponse.json(booking, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 })
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
 ```
@@ -1863,74 +2092,78 @@ export async function POST(req: Request) {
 ### Cron job reminder H-1 — `src/app/api/cron/reminder/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { sendReminderEmail } from '@/lib/mailer'
-import { sendReminderTelegram } from '@/lib/telegram'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { sendReminderEmail } from "@/lib/mailer";
+import { sendReminderTelegram } from "@/lib/telegram";
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get('authorization')
+  const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(0, 0, 0, 0)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
 
-  const nextDay = new Date(tomorrow)
-  nextDay.setDate(nextDay.getDate() + 1)
+  const nextDay = new Date(tomorrow);
+  nextDay.setDate(nextDay.getDate() + 1);
 
   const bookings = await prisma.booking.findMany({
     where: {
       remindedAt: null,
-      status: 'CONFIRMED',
+      status: "CONFIRMED",
       slot: { slotDate: { gte: tomorrow, lt: nextDay } },
     },
     include: {
       customer: true,
       slot: { include: { business: true } },
     },
-  })
+  });
 
-  let sent = 0
-  let failed = 0
+  let sent = 0;
+  let failed = 0;
 
   for (const booking of bookings) {
     try {
       const notifData = {
         customerName: booking.customer.name,
         businessName: booking.slot.business.name,
-        date: booking.slot.slotDate.toLocaleDateString('id-ID', {
-          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        date: booking.slot.slotDate.toLocaleDateString("id-ID", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         }),
-        time: booking.slot.startTime.toLocaleTimeString('id-ID', {
-          hour: '2-digit', minute: '2-digit',
+        time: booking.slot.startTime.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
         }),
-      }
+      };
 
       // Kirim email reminder (selalu)
-      await sendReminderEmail(booking.customer.email, notifData)
+      await sendReminderEmail(booking.customer.email, notifData);
 
       // Kirim Telegram reminder (kalau user sudah connect)
       if (booking.customer.telegramChatId) {
-        await sendReminderTelegram(booking.customer.telegramChatId, notifData)
+        await sendReminderTelegram(booking.customer.telegramChatId, notifData);
       }
 
       // Tandai sudah di-remind
       await prisma.booking.update({
         where: { id: booking.id },
         data: { remindedAt: new Date() },
-      })
+      });
 
-      sent++
+      sent++;
     } catch (err) {
-      console.error(`Gagal kirim reminder booking ${booking.id}:`, err)
-      failed++
+      console.error(`Gagal kirim reminder booking ${booking.id}:`, err);
+      failed++;
     }
   }
 
-  return NextResponse.json({ sent, failed, total: bookings.length })
+  return NextResponse.json({ sent, failed, total: bookings.length });
 }
 ```
 
@@ -2033,20 +2266,20 @@ vercel --prod   # deploy ke production
 
 Buka **Vercel Dashboard → project jadwalin → Settings → Environment Variables**, tambahkan:
 
-| Key | Value |
-|---|---|
-| `DATABASE_URL` | connection string Supabase |
-| `JWT_SECRET` | secret yang sudah dibuat |
-| `JWT_EXPIRES_IN` | `7d` |
-| `GMAIL_USER` | email Gmail kamu |
-| `GMAIL_APP_PASSWORD` | 16 karakter app password |
-| `TELEGRAM_BOT_TOKEN` | token dari BotFather |
-| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | username bot tanpa @ |
-| `CLOUDINARY_CLOUD_NAME` | dari Cloudinary dashboard |
-| `CLOUDINARY_API_KEY` | dari Cloudinary dashboard |
-| `CLOUDINARY_API_SECRET` | dari Cloudinary dashboard |
-| `NEXT_PUBLIC_APP_URL` | `https://jadwalin.vercel.app` |
-| `CRON_SECRET` | random string untuk keamanan cron |
+| Key                                 | Value                             |
+| ----------------------------------- | --------------------------------- |
+| `DATABASE_URL`                      | connection string Supabase        |
+| `JWT_SECRET`                        | secret yang sudah dibuat          |
+| `JWT_EXPIRES_IN`                    | `7d`                              |
+| `GMAIL_USER`                        | email Gmail kamu                  |
+| `GMAIL_APP_PASSWORD`                | 16 karakter app password          |
+| `TELEGRAM_BOT_TOKEN`                | token dari BotFather              |
+| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | username bot tanpa @              |
+| `CLOUDINARY_CLOUD_NAME`             | dari Cloudinary dashboard         |
+| `CLOUDINARY_API_KEY`                | dari Cloudinary dashboard         |
+| `CLOUDINARY_API_SECRET`             | dari Cloudinary dashboard         |
+| `NEXT_PUBLIC_APP_URL`               | `https://jadwalin.vercel.app`     |
+| `CRON_SECRET`                       | random string untuk keamanan cron |
 
 Setelah semua env vars ditambahkan, redeploy:
 
@@ -2068,7 +2301,7 @@ curl -X POST "https://api.telegram.org/bot[BOT_TOKEN]/setWebhook" \
 Ganti `[BOT_TOKEN]` dengan token dari BotFather. Kalau berhasil:
 
 ```json
-{"ok": true, "result": true, "description": "Webhook was set"}
+{ "ok": true, "result": true, "description": "Webhook was set" }
 ```
 
 ### Langkah 5 — Verifikasi Cron Job aktif
@@ -2164,6 +2397,6 @@ vercel --prod                      # deploy ke Vercel production
 
 ---
 
-*Jadwalin · Booking & Scheduling Platform*
-*Stack: Next.js 16 · TypeScript · Prisma 7 · PostgreSQL · JWT · Nodemailer · Telegram Bot · Tailwind CSS*
-*Deploy: Vercel (frontend + API + Cron Jobs)*
+_Jadwalin · Booking & Scheduling Platform_
+_Stack: Next.js 16 · TypeScript · Prisma 7 · PostgreSQL · JWT · Nodemailer · Telegram Bot · Tailwind CSS_
+_Deploy: Vercel (frontend + API + Cron Jobs)_
