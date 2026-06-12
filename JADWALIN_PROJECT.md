@@ -1,6 +1,6 @@
 # Jadwalin — Booking & Scheduling Platform
 > Panduan lengkap pengerjaan dari setup hingga deployment
-> Stack: Next.js 16 · TypeScript · Prisma 7 · PostgreSQL · Redis · Tailwind CSS · JWT
+> Stack: Next.js 16 · TypeScript · Prisma 7 · PostgreSQL · JWT · Telegram Bot · Tailwind CSS
 
 ---
 
@@ -1208,16 +1208,8 @@ export async function POST(req: Request) {
 
 ### Daftarkan webhook ke Telegram
 
-Jalankan perintah ini sekali saja setelah deploy ke Vercel:
-
-```bash
-curl -X POST "https://api.telegram.org/bot[BOT_TOKEN]/setWebhook" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://jadwalin.vercel.app/api/telegram/webhook"}'
-
-# Ganti [BOT_TOKEN] dengan token dari BotFather
-# Harusnya dapat response: {"ok":true,"result":true}
-```
+Jalankan perintah ini **sekali saja setelah deploy ke Vercel** — bukan sekarang.
+Langkah lengkapnya ada di bagian Deployment (bagian 12).
 
 ---
 
