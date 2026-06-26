@@ -6,7 +6,6 @@ import bcrypt from "bcryptjs";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 
 const prisma = new PrismaClient({ adapter });
-
 async function main() {
   const owner = await prisma.user.upsert({
     where: { email: "rudi@jadwalin.id" },

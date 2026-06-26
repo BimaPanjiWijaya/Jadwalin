@@ -340,13 +340,21 @@ CRON_SECRET=""
 2. Isi nama project: `jadwalin`, region: **Southeast Asia (Singapore)**
 3. Buat password database yang kuat — simpan, karena tidak bisa dilihat lagi
 4. Tunggu project selesai dibuat (~2 menit)
-5. Pergi ke **Settings → Database → Connection string → URI**
-6. Copy URI, ganti `[YOUR-PASSWORD]` dengan password tadi
+5. Pergi ke **Settings → Database → Connection string**
+6. Copy dua jenis URL berikut dan paste ke `.env`:
 
 ```env
-# Paste ke .env.local
-DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:5432/postgres"
+# .env (bukan .env.local — keduanya sudah di-ignore oleh .gitignore)
+
+# Connection pooler (port 6543) — untuk runtime Next.js
+DATABASE_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
+
+# Direct connection (port 5432) — untuk migrasi Prisma
+DIRECT_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
 ```
+
+> **Catatan Prisma 7:** `prisma.config.ts` menggunakan `DIRECT_URL` untuk migrasi
+> dan `DATABASE_URL` sebagai fallback. Pastikan keduanya diisi.
 
 ---
 
@@ -363,7 +371,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Catatan Prisma 7: url tidak ditaruh di sini.
+  // Koneksi dikelola oleh prisma.config.ts via DIRECT_URL / DATABASE_URL
 }
 
 enum Role {
@@ -533,25 +542,21 @@ npx prisma studio
 
 Buat `src/lib/prisma.ts`:
 
+> **Catatan Prisma 7:** Koneksi database dikonfigurasi di `prisma.config.ts`, bukan di dalam kode client.
+> Tidak perlu `PrismaPg` adapter di sini.
+
 ```typescript
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function createPrismaClient() {
-  const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
-  });
-  return new PrismaClient({
-    adapter,
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["query"] : [],
   });
-}
-
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
@@ -658,13 +663,14 @@ main()
   .finally(() => prisma.$disconnect());
 ```
 
-Tambahkan ke `package.json`:
-
-```json
-"prisma": {
-  "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-}
-```
+> **Catatan Prisma 7:** Seed config **tidak** ditaruh di `package.json`.
+> Sudah otomatis terkonfigurasi di `prisma.config.ts`:
+>
+> ```ts
+> migrations: {
+>   seed: 'ts-node --compiler-options {"module":"CommonJS"} prisma/seed.ts',
+> }
+> ```
 
 ```bash
 npx prisma db seed
