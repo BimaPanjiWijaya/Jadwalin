@@ -714,7 +714,9 @@ export interface JwtPayload {
 
 // Buat token baru
 export function signToken(payload: JwtPayload): string {
-  const options: SignOptions = { expiresIn: JWT_EXPIRES_IN as SignOptions["expiresIn"] };
+  const options: SignOptions = {
+    expiresIn: JWT_EXPIRES_IN as SignOptions["expiresIn"],
+  };
   return jwt.sign(payload, JWT_SECRET, options);
 }
 
@@ -730,8 +732,6 @@ export function verifyToken(token: string): JwtPayload | null {
 
 > **Catatan:** `expiresIn` di `@types/jsonwebtoken` versi terbaru menggunakan tipe `ms.StringValue`
 > yang lebih ketat dari `string` biasa. Cast via `SignOptions["expiresIn"]` adalah cara yang benar.
-
-### Buat auth helper — `src/lib/auth.ts`
 
 ```typescript
 import { cookies } from "next/headers";
@@ -1309,7 +1309,7 @@ cloudinary.config({
 // Upload gambar dari buffer, return URL publik
 export async function uploadImage(
   buffer: Buffer,
-  folder: string = "jadwalin"
+  folder: string = "jadwalin",
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -1343,12 +1343,18 @@ export async function POST(req: Request) {
 
   // Validasi tipe file
   if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ error: "Hanya file gambar yang diizinkan" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Hanya file gambar yang diizinkan" },
+      { status: 400 },
+    );
   }
 
   // Validasi ukuran (max 2MB)
   if (file.size > 2 * 1024 * 1024) {
-    return NextResponse.json({ error: "Ukuran file maksimal 2MB" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Ukuran file maksimal 2MB" },
+      { status: 400 },
+    );
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
