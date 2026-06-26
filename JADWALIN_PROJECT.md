@@ -701,7 +701,7 @@ JWT_EXPIRES_IN="7d"
 ### Buat JWT helper — `src/lib/jwt.ts`
 
 ```typescript
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
@@ -714,7 +714,8 @@ export interface JwtPayload {
 
 // Buat token baru
 export function signToken(payload: JwtPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  const options: SignOptions = { expiresIn: JWT_EXPIRES_IN as SignOptions["expiresIn"] };
+  return jwt.sign(payload, JWT_SECRET, options);
 }
 
 // Verifikasi token, return null kalau invalid
@@ -726,6 +727,9 @@ export function verifyToken(token: string): JwtPayload | null {
   }
 }
 ```
+
+> **Catatan:** `expiresIn` di `@types/jsonwebtoken` versi terbaru menggunakan tipe `ms.StringValue`
+> yang lebih ketat dari `string` biasa. Cast via `SignOptions["expiresIn"]` adalah cara yang benar.
 
 ### Buat auth helper — `src/lib/auth.ts`
 
