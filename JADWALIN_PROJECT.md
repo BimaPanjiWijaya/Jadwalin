@@ -735,7 +735,7 @@ export function verifyToken(token: string): JwtPayload | null {
 
 ```typescript
 import { cookies } from "next/headers";
-import { verifyToken, JwtPayload } from "@/lib/jwt";
+import { verifyToken, JwtPayload } from "@/src/lib/jwt";
 
 // Ambil session dari cookie di server component / API route
 export async function getSession(): Promise<JwtPayload | null> {
@@ -752,9 +752,9 @@ export async function getSession(): Promise<JwtPayload | null> {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 import bcrypt from "bcryptjs";
-import { signToken } from "@/lib/jwt";
+import { signToken } from "@/src/lib/jwt";
 
 export async function POST(req: Request) {
   const { name, email, password, role } = await req.json();
@@ -813,9 +813,9 @@ export async function POST(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 import bcrypt from "bcryptjs";
-import { signToken } from "@/lib/jwt";
+import { signToken } from "@/src/lib/jwt";
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
@@ -890,8 +890,8 @@ export async function POST() {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getSession } from "@/src/lib/auth";
+import { prisma } from "@/src/lib/prisma";
 
 export async function GET() {
   const session = await getSession();
@@ -916,7 +916,7 @@ Buat `src/proxy.ts`:
 
 ```typescript
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/jwt";
+import { verifyToken } from "@/src/lib/jwt";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -1188,8 +1188,8 @@ Sampai jumpa! 👋
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // POST /api/profile/telegram
 // Body: { telegramChatId: "123456789" }
@@ -1331,7 +1331,7 @@ export async function deleteImage(publicId: string): Promise<void> {
 
 ```typescript
 // Contoh: upload logo bisnis di src/app/api/businesses/[id]/logo/route.ts
-import { uploadImage } from "@/lib/cloudinary";
+import { uploadImage } from "@/src/lib/cloudinary";
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -1408,7 +1408,7 @@ export async function POST(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 
 // GET /api/businesses?category=barbershop
 export async function GET(req: Request) {
@@ -1473,7 +1473,7 @@ export async function POST(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 
 // GET /api/businesses/[id] — bisa pakai id atau slug
 export async function GET(
@@ -1532,8 +1532,8 @@ export async function PATCH(
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // GET /api/slots?businessId=xxx&date=2025-06-14
 export async function GET(req: Request) {
@@ -1604,8 +1604,8 @@ export async function POST(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // PATCH /api/slots/[id] — block atau unblock slot
 export async function PATCH(
@@ -1673,8 +1673,8 @@ export async function DELETE(
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // GET /api/services?businessId=xxx
 export async function GET(req: Request) {
@@ -1723,8 +1723,8 @@ export async function POST(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // GET /api/bookings?customerId=xxx — riwayat customer
 // GET /api/bookings?businessId=xxx&date=2025-06-14 — antrian bisnis
@@ -1793,8 +1793,8 @@ export async function GET(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // PATCH /api/bookings/[id] — update status
 export async function PATCH(
@@ -1854,8 +1854,8 @@ export async function PATCH(
 ```typescript
 // src/app/api/bookings/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -1927,8 +1927,8 @@ tanpa harus input satu per satu.
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 // POST /api/slots/generate
 // Body: { businessId, serviceId, date, openTime, closeTime, intervalMinutes }
@@ -2018,10 +2018,10 @@ export async function POST(req: Request) {
 ```typescript
 // src/app/api/bookings/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
-import { sendBookingConfirmationEmail } from "@/lib/mailer";
-import { sendBookingConfirmationTelegram } from "@/lib/telegram";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
+import { sendBookingConfirmationEmail } from "@/src/lib/mailer";
+import { sendBookingConfirmationTelegram } from "@/src/lib/telegram";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -2119,9 +2119,9 @@ export async function POST(req: Request) {
 
 ```typescript
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { sendReminderEmail } from "@/lib/mailer";
-import { sendReminderTelegram } from "@/lib/telegram";
+import { prisma } from "@/src/lib/prisma";
+import { sendReminderEmail } from "@/src/lib/mailer";
+import { sendReminderTelegram } from "@/src/lib/telegram";
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
