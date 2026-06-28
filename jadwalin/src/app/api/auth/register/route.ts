@@ -1,0 +1,51 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/src/lib/prisma";
+import bcrypt from "bcryptjs";
+import { signToken } from "@/src/lib/jwt";
+
+export async function POST(req: Request) {
+  const { name, email, password, role } = await req.json();
+
+  if (!name || !email || !password) {
+    return NextResponse.json(
+      { error: "Semua field wajib diisi" },
+      { status: 400 },
+    );
+  }
+
+  const exist = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (exist) {
+    return NextResponse.json(
+      { error: "Email sudah terdaftar" },
+      { status: 400 },
+    );
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      role: role === "BUSINESS_OWNER" ? "BUSINESS_OWNER" : "CUSTOMER",
+    },
+  });
+
+  const token = signToken({ id: user.id, email: user.email, role: user.role });
+
+  const response = NextResponse.json(
+    { id: user.id, name: user.name, email: user.email, role: user.role },
+    { status: 201 },
+  );
+  response.cookies.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+  return response;
+}
