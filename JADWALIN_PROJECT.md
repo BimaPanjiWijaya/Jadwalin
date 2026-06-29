@@ -968,7 +968,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
-    role: "CUSTOMER",
+    role: "",  // kosong agar select menampilkan "Pilih Role" dulu
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -977,6 +977,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (!form.role) {
+      setError("Role wajib dipilih");
+      setLoading(false);
+      return;
+    }
 
     const res = await fetch("/api/auth/register", {
       method: "POST",
@@ -1028,6 +1034,7 @@ export default function RegisterPage() {
           onChange={(e) => setForm({ ...form, role: e.target.value })}
           className="border rounded px-3 py-2"
         >
+          <option value="" disabled>Pilih Role</option>
           <option value="CUSTOMER">Customer</option>
           <option value="BUSINESS_OWNER">Business Owner</option>
         </select>
