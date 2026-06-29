@@ -918,7 +918,7 @@ Buat `src/proxy.ts`:
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/src/lib/jwt";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Ambil token dari cookie
