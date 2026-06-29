@@ -20,7 +20,7 @@ export default function RegisterPage() {
     setError("");
 
     if (!form.role) {
-      setError("Role Wajib Dipili");
+      setError("Role Wajib Dipilih");
       setLoading(false);
       return;
     }
