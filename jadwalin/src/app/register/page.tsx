@@ -19,7 +19,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("api/auth/register", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -52,7 +52,7 @@ export default function RegisterPage() {
         />
 
         <input
-          type="text"
+          type="email"
           placeholder="Email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -60,7 +60,7 @@ export default function RegisterPage() {
         />
 
         <input
-          type="text"
+          type="password"
           placeholder="Password"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -84,7 +84,7 @@ export default function RegisterPage() {
           disabled={loading}
           className="bg-blue-600 text-white rounded py-2 disabled:opacity-50"
         >
-          {loading ? "Memperoses..." : "Daftar"}
+          {loading ? "Memproses..." : "Daftar"}
         </button>
         <p className="text-sm text-center">
           Sudah punya akun?{" "}
