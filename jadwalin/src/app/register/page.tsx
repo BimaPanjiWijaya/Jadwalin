@@ -33,4 +33,5 @@ export default function RegisterPage() {
     }
     router.push("/");
   }
+  return <div>HELOO BOSS</div>;
 }
