@@ -19,6 +19,12 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
+    if (!form.role) {
+      setError("Role Wajib Dipili");
+      setLoading(false);
+      return;
+    }
+
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
