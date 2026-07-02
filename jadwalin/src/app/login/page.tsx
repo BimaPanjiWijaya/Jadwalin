@@ -51,6 +51,14 @@ export default function Loginpage() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           className="border rounded px-3 py-2"
         />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white rounded py-2 disabled:opacity-50"
+        >
+          {loading ? "Memproses..." : "Login"}
+        </button>
       </form>
     </div>
   );
