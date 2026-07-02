@@ -43,6 +43,14 @@ export default function Loginpage() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           className="border rounded px-3 py-2"
         />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          className="border rounded px-3 py-2"
+        />
       </form>
     </div>
   );
