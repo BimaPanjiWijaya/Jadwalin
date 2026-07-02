@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Loginpage() {
   const router = useRouter();
@@ -62,13 +65,13 @@ export default function Loginpage() {
 
         <p className="text-sm text-center">
           Belum Punya Akun?{" "}
-          <a
+          <Link
             href="/register"
             className="text-blue-600
             underline"
           >
             Daftar
-          </a>
+          </Link>
         </p>
       </form>
     </div>
