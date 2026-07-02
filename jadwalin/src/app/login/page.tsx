@@ -26,4 +26,5 @@ export default function Loginpage() {
     }
     router.push("/");
   }
+  return <div></div>;
 }
