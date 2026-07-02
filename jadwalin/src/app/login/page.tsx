@@ -35,7 +35,7 @@ export default function Loginpage() {
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 w-full max-w-sm p-6 border rounded-lg"
       >
-        <h1 className="text-2xl font-bold">Login</h1>
+        <h1 className="text-2xl font-bold text-center">Login</h1>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 

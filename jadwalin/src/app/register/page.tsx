@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -94,9 +95,9 @@ export default function RegisterPage() {
         </button>
         <p className="text-sm text-center">
           Sudah punya akun?{" "}
-          <a href="/login" className="text-blue-600 underline">
+          <Link href="/login" className="text-blue-600 underline">
             Login
-          </a>
+          </Link>
         </p>
       </form>
     </div>
