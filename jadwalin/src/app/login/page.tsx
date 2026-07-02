@@ -26,5 +26,24 @@ export default function Loginpage() {
     }
     router.push("/");
   }
-  return <div></div>;
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 w-full max-w-sm p-6 border rounded-lg"
+      >
+        <h1 className="text-2xl font-bold">Login</h1>
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className="border rounded px-3 py-2"
+        />
+      </form>
+    </div>
+  );
 }
