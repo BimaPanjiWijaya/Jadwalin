@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -26,19 +26,24 @@ export default function RegisterPage() {
       return;
     }
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error);
+      if (!res.ok) {
+        setError(data.error);
+        return;
+      }
+      router.push("/login");
+    } catch {
+      setError("Gagal terhubung ke server. Coba lagi.");
+    } finally {
       setLoading(false);
-      return;
     }
-    router.push("/");
   }
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -79,10 +84,10 @@ export default function RegisterPage() {
           onChange={(e) => setForm({ ...form, role: e.target.value })}
           className="border rounded px-3 py-2"
         >
-          <option value="" disabled={true}>
+          <option value="" disabled>
             Pilih Role
           </option>
-          <option value="CUSTOMER"> Customer</option>
+          <option value="CUSTOMER">Customer</option>
           <option value="BUSINESS_OWNER">Business Owner</option>
         </select>
 
