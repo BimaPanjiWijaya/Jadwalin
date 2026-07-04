@@ -542,24 +542,28 @@ npx prisma studio
 
 Buat `src/lib/prisma.ts`:
 
-> **Catatan Prisma 7:** Koneksi database dikonfigurasi di `prisma.config.ts`, bukan di dalam kode client.
-> Tidak perlu `PrismaPg` adapter di sini.
-
 ```typescript
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === "development" ? ["query"] : [],
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
+
+> **Catatan Prisma 7:** Wajib menggunakan `PrismaPg` adapter dari `@prisma/adapter-pg`.
+> Tanpa adapter, akan muncul error `PrismaClientConstructorValidationError: Using engine type "client" requires either "adapter" or "accelerateUrl"`.
 
 ### Buat seed data
 
