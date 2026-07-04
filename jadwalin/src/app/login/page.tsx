@@ -1,33 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function Loginpage() {
+export default function LoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error);
+      if (!res.ok) {
+        setError(data.error);
+        return;
+      }
+      router.push("/");
+    } catch {
+      setError("Gagal terhubung ke server. Coba lagi.");
+    } finally {
       setLoading(false);
-      return;
     }
-    router.push("/");
   }
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -65,11 +70,7 @@ export default function Loginpage() {
 
         <p className="text-sm text-center">
           Belum Punya Akun?{" "}
-          <Link
-            href="/register"
-            className="text-blue-600
-            underline"
-          >
+          <Link href="/register" className="text-blue-600 underline">
             Daftar
           </Link>
         </p>
