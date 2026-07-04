@@ -959,8 +959,9 @@ export const config = {
 ```tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -973,7 +974,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -984,27 +985,32 @@ export default function RegisterPage() {
       return;
     }
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error);
+      if (!res.ok) {
+        setError(data.error);
+        return;
+      }
+
+      router.push("/login");
+    } catch {
+      setError("Gagal terhubung ke server. Coba lagi.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/");
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm p-6 border rounded-lg">
-        <h1 className="text-2xl font-bold">Daftar</h1>
+        <h1 className="text-2xl font-bold text-center">Daftar</h1>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -1049,7 +1055,7 @@ export default function RegisterPage() {
 
         <p className="text-sm text-center">
           Sudah punya akun?{" "}
-          <a href="/login" className="text-blue-600 underline">Login</a>
+          <Link href="/login" className="text-blue-600 underline">Login</Link>
         </p>
       </form>
     </div>
@@ -1064,8 +1070,9 @@ export default function RegisterPage() {
 ```tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -1073,32 +1080,37 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error);
+      if (!res.ok) {
+        setError(data.error);
+        return;
+      }
+
+      router.push("/");
+    } catch {
+      setError("Gagal terhubung ke server. Coba lagi.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/");
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm p-6 border rounded-lg">
-        <h1 className="text-2xl font-bold">Login</h1>
+        <h1 className="text-2xl font-bold text-center">Login</h1>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -1127,7 +1139,7 @@ export default function LoginPage() {
 
         <p className="text-sm text-center">
           Belum punya akun?{" "}
-          <a href="/register" className="text-blue-600 underline">Daftar</a>
+          <Link href="/register" className="text-blue-600 underline">Daftar</Link>
         </p>
       </form>
     </div>
@@ -1151,7 +1163,7 @@ export default async function DashboardPage() {
 }
 
 // Di API route
-import { getSession } from '@/lib/auth'
+import { getSession } from '@/src/lib/auth'
 
 export async function POST(req: Request) {
   const session = await getSession()
@@ -1517,9 +1529,21 @@ export async function deleteImage(publicId: string): Promise<void> {
 
 ```typescript
 // Contoh: upload logo bisnis di src/app/api/businesses/[id]/logo/route.ts
+import { NextResponse } from "next/server";
 import { uploadImage } from "@/src/lib/cloudinary";
+import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const formData = await req.formData();
   const file = formData.get("logo") as File;
 
@@ -1548,7 +1572,7 @@ export async function POST(req: Request) {
 
   // Simpan URL ke database
   await prisma.business.update({
-    where: { id: params.id },
+    where: { id },
     data: { logoUrl },
   });
 
@@ -1618,7 +1642,7 @@ export async function GET(req: Request) {
 
 // POST /api/businesses — buat bisnis baru (business owner)
 export async function POST(req: Request) {
-  const { getSession } = await import("@/lib/auth");
+  const { getSession } = await import("@/src/lib/auth");
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -1664,11 +1688,12 @@ import { prisma } from "@/src/lib/prisma";
 // GET /api/businesses/[id] — bisa pakai id atau slug
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const business = await prisma.business.findFirst({
     where: {
-      OR: [{ id: params.id }, { slug: params.id }],
+      OR: [{ id }, { slug: id }],
       isActive: true,
     },
     include: {
@@ -1690,15 +1715,16 @@ export async function GET(
 // PATCH /api/businesses/[id] — edit profil bisnis
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { getSession } = await import("@/lib/auth");
+  const { id } = await params
+  const { getSession } = await import("@/src/lib/auth");
   const session = await getSession();
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const business = await prisma.business.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
   if (!business || business.ownerId !== session.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -1706,7 +1732,7 @@ export async function PATCH(
 
   const data = await req.json();
   const updated = await prisma.business.update({
-    where: { id: params.id },
+    where: { id },
     data,
   });
 
@@ -1796,8 +1822,9 @@ import { getSession } from "@/src/lib/auth";
 // PATCH /api/slots/[id] — block atau unblock slot
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -1807,7 +1834,7 @@ export async function PATCH(
 
   // Pastikan slot milik bisnis yang dimiliki owner ini
   const slot = await prisma.slot.findFirst({
-    where: { id: params.id, business: { ownerId: session.id } },
+    where: { id, business: { ownerId: session.id } },
   });
   if (!slot)
     return NextResponse.json(
@@ -1816,7 +1843,7 @@ export async function PATCH(
     );
 
   const updated = await prisma.slot.update({
-    where: { id: params.id },
+    where: { id },
     data: { status },
   });
 
@@ -1826,15 +1853,16 @@ export async function PATCH(
 // DELETE /api/slots/[id] — hapus slot (hanya kalau belum ada booking)
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const slot = await prisma.slot.findFirst({
-    where: { id: params.id, business: { ownerId: session.id } },
+    where: { id, business: { ownerId: session.id } },
     include: { _count: { select: { bookings: true } } },
   });
 
@@ -1850,7 +1878,7 @@ export async function DELETE(
     );
   }
 
-  await prisma.slot.delete({ where: { id: params.id } });
+  await prisma.slot.delete({ where: { id } });
   return NextResponse.json({ message: "Slot berhasil dihapus" });
 }
 ```
@@ -1985,8 +2013,9 @@ import { getSession } from "@/src/lib/auth";
 // PATCH /api/bookings/[id] — update status
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params
   const session = await getSession();
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1994,7 +2023,7 @@ export async function PATCH(
   const { status } = await req.json();
 
   const booking = await prisma.booking.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { slot: { include: { business: true } } },
   });
 
@@ -2019,7 +2048,7 @@ export async function PATCH(
   }
 
   const updated = await prisma.booking.update({
-    where: { id: params.id },
+    where: { id },
     data: { status },
   });
 
