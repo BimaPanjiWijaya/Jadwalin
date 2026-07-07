@@ -72,4 +72,6 @@ Halo ${data.customerName}, jangan lupa booking kamu besok ya!
 
 Sampai jumpa! 👋
   `.trim();
+
+  await sendTelegramMessage(chatId, text);
 }
