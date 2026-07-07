@@ -1,6 +1,3 @@
-import { error } from "console";
-import { parse } from "path";
-
 const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 
 export async function sendTelegramMessage(
