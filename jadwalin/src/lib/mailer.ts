@@ -40,3 +40,31 @@ export async function sendBookingConfirmationEmail(
     `,
   });
 }
+
+export async function sendReminderEmail(
+  to: string,
+  data: {
+    customerName: string;
+    businessName: string;
+    date: string;
+    time: string;
+  },
+) {
+  await transporter.sendMail({
+    from: `"Jadwalin" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: `Reminder: Booking besok di ${data.businessName}`,
+    html: `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+        <h2>Jangan lupa booking kamu besok!</h2>
+        <p>Halo ${data.customerName},</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:16px;">
+          <tr><td style="padding:8px;color:#666;">Tempat</td><td style="padding:8px;">${data.businessName}</td></tr>
+          <tr style="background:#f9f9f9"><td style="padding:8px;color:#666;">Tanggal</td><td style="padding:8px;">${data.date}</td></tr>
+          <tr><td style="padding:8px;color:#666;">Waktu</td><td style="padding:8px;">${data.time}</td></tr>
+        </table>
+        <p style="color:#999;font-size:12px;margin-top:24px;">— Tim Jadwalin</p>
+      </div>
+    `,
+  });
+}
