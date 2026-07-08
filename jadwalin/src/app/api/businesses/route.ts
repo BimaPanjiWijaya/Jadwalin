@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
-import { error } from "console";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -28,4 +27,30 @@ export async function POST(req: Request) {
   }
   const { name, slug, category, description, address, phone } =
     await req.json();
+
+  if (!name || !slug || !category) {
+    return NextResponse.json(
+      { error: "name, slug, dan category wajib diisi" },
+      { status: 400 },
+    );
+  }
+  const exists = await prisma.business.findUnique({
+    where: { slug },
+  });
+  if (exists) {
+    return NextResponse.json({ error: "slug sudah dipakai" }, { status: 400 });
+  }
+
+  const business = await prisma.business.create({
+    data: {
+      ownerId: session.id,
+      name,
+      slug,
+      category,
+      description,
+      address,
+      phone,
+    },
+  });
+  return NextResponse.json(business, { status: 201 });
 }
