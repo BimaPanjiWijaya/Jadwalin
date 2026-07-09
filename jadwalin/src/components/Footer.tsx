@@ -47,7 +47,7 @@ export default function Footer() {
             Masuk
           </Link>
         </div>
-        <p className="text-xs text-gray-400">© 2025 Jadwalin</p>
+        <p className="text-xs text-gray-400">© 2026 Jadwalin</p>
       </div>
     </footer>
   );
