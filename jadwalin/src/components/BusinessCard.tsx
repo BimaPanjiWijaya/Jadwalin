@@ -27,7 +27,7 @@ export default function BusinessCard({
       {logoUrl ? (
         <img src={logoUrl} alt={name} className="w-full h-44 object-cover" />
       ) : (
-        <div className="w-full h-44 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        <div className="w-full h-44 bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center">
           <span className="text-5xl font-bold text-blue-200">
             {name.charAt(0)}
           </span>
