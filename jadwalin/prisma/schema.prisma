@@ -124,6 +124,7 @@ model Booking {
   id         String        @id @default(uuid())
   slotId     String        @map("slot_id")
   customerId String        @map("customer_id")
+  bookingCode String       @unique @map("booking_code")
   status     BookingStatus @default(PENDING)
   notes      String?
   bookedAt   DateTime      @default(now()) @map("booked_at")

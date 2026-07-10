@@ -50,6 +50,7 @@ export interface SlotWithBookingCount {
 
 export interface BookingWithDetails {
   id: string;
+  bookingCode: string;
   status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
   notes: string | null;
   bookedAt: Date;
