@@ -104,7 +104,6 @@ export default function BookPage({
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
-      {/* Header bisnis */}
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-6 shadow-sm">
         {business.logoUrl && (
           <img
@@ -150,7 +149,6 @@ export default function BookPage({
 
       <div className="grid md:grid-cols-5 gap-6">
         <div className="md:col-span-3 space-y-6">
-          {/* Pilih tanggal */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <h2 className="font-semibold text-gray-900 mb-3">Pilih Tanggal</h2>
             <input
@@ -162,7 +160,6 @@ export default function BookPage({
             />
           </div>
 
-          {/* Grid slot */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <h2 className="font-semibold text-gray-900 mb-4">Pilih Waktu</h2>
             {slots.length === 0 ? (
@@ -208,7 +205,6 @@ export default function BookPage({
           </div>
         </div>
 
-        {/* Panel konfirmasi */}
         <div className="md:col-span-2">
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm sticky top-24">
             <h2 className="font-semibold text-gray-900 mb-4">
