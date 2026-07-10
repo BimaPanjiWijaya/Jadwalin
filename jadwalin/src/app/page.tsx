@@ -32,14 +32,13 @@ export default async function HomePage({
       {/* Hero */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-blue-900 mb-3">
-          Temukan & Booking Layanan
+          Temukan & Booking Layananmu di Sini!
         </h1>
         <p className="text-gray-500 text-lg">
           Jadwalkan dengan mudah dan cepat
         </p>
       </div>
 
-      {/* Filter kategori */}
       <div className="flex gap-2 flex-wrap justify-center mb-8">
         {CATEGORIES.map((cat) => (
           <Link
@@ -56,7 +55,6 @@ export default async function HomePage({
         ))}
       </div>
 
-      {/* Grid bisnis */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {businesses.map((biz) => (
           <BusinessCard
