@@ -47,7 +47,6 @@ export default function RegisterPage() {
   }
   return (
     <div className="min-h-screen flex">
-      {/* Kiri — branding */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 bg-blue-600 p-12 text-white">
         <span className="text-2xl font-bold tracking-tight">Jadwalin</span>
         <div>
@@ -63,7 +62,6 @@ export default function RegisterPage() {
         <p className="text-blue-200 text-sm">© 2026 Jadwalin</p>
       </div>
 
-      {/* Kanan — form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
         <div className="w-full max-w-md">
           <div className="mb-8">
