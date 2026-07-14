@@ -25,3 +25,33 @@ export async function GET(
   }
   return NextResponse.json(business);
 }
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const { getSession } = await import("@/src/lib/auth");
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const business = await prisma.business.findUnique({
+    where: { id },
+  });
+  if (!business || business.ownerId !== session.id) {
+    return NextResponse.json(
+      { error: "Forbidden" },
+      {
+        status: 403,
+      },
+    );
+  }
+
+  const data = await req.json();
+  const updated = await prisma.business.update({
+    where: { id },
+    data,
+  });
+  return NextResponse.json(updated);
+}
