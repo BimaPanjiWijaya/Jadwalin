@@ -18,4 +18,19 @@ export async function GET(req: Request) {
   const slotDate = new Date(date);
   const nextDate = new Date(slotDate);
   nextDate.setDate(nextDate.getDate() + 1);
+
+  const slots = await prisma.slot.findMany({
+    where: {
+      businessId,
+      slotDate: { gte: slotDate, lt: nextDate },
+      status: { not: "BLOCKED" },
+    },
+    include: {
+      service: true,
+      _count: { select: { bookings: true } },
+    },
+    orderBy: { startTime: "asc" },
+  });
+
+  return NextResponse.json(slots);
 }
