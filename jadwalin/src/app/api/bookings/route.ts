@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       include: {
         slot: { include: { business: true, service: true } },
       },
-      orderBy: { bookedAt: "asc" },
+      orderBy: { bookedAt: "desc" },
     });
     return NextResponse.json(bookings);
   }
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
     return NextResponse.json(bookings);
   }
   return NextResponse.json(
-    { error: "customerId atau businessId wajid diisi" },
+    { error: "customerId atau businessId+date wajid diisi" },
     { status: 400 },
   );
 }
