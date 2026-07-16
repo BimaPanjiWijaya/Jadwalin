@@ -4,7 +4,7 @@ import { verifyToken } from "./lib/jwt";
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("auth_token")?.value;
   const session = token ? verifyToken(token) : null;
 
   const protectedRoutes = ["/my-bookings", "/book", "/dashboard"];
