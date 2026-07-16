@@ -57,5 +57,5 @@ export async function DELETE(
   }
 
   await prisma.slot.delete({ where: { id } });
-  return NextResponse.json({ messahe: "Slot berhasil dihapus" });
+  return NextResponse.json({ message: "Slot berhasil dihapus" });
 }
