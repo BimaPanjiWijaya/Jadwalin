@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import bcrypt from "bcryptjs";
-import { signToken } from "@/src/lib/jwt";
 
 export async function POST(req: Request) {
   const { name, email, password, role } = await req.json();
@@ -13,10 +12,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const exist = await prisma.user.findUnique({
-    where: { email },
-  });
-
+  const exist = await prisma.user.findUnique({ where: { email } });
   if (exist) {
     return NextResponse.json(
       { error: "Email sudah terdaftar" },
@@ -34,18 +30,8 @@ export async function POST(req: Request) {
     },
   });
 
-  const token = signToken({ id: user.id, email: user.email, role: user.role });
-
-  const response = NextResponse.json(
+  return NextResponse.json(
     { id: user.id, name: user.name, email: user.email, role: user.role },
     { status: 201 },
   );
-  response.cookies.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  });
-  return response;
 }
