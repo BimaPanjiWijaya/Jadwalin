@@ -3,7 +3,7 @@ import { prisma } from "@/src/lib/prisma";
 import { getSession } from "@/src/lib/auth";
 
 export async function GET(req: Request) {
-  const { searchParams } = await new URL(req.url);
+  const { searchParams } = new URL(req.url);
   const businessId = searchParams.get("businessId");
   if (!businessId) {
     return NextResponse.json(
@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
-    return NextResponse.json({ error: "Forbides" }, { status: 403 });
+    return NextResponse.json({ error: "Forbiden" }, { status: 403 });
   }
   const { businessId, name, description, durationMinutes, price } =
     await req.json();
