@@ -57,3 +57,5 @@ export async function GET(req: Request) {
     { status: 400 },
   );
 }
+
+export async function POST() {}
