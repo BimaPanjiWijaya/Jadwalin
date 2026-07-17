@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { getSession } from "@/src/lib/auth";
-import { error } from "console";
 
 export async function GET(req: Request) {
   const session = await getSession();
@@ -67,6 +66,42 @@ export async function POST(req: Request) {
   const { slotId, notes } = await req.json();
 
   try {
+    const booking = await prisma.$transaction(async (tx) => {
+      const slot = await tx.slot.findUnique({
+        where: { id: slotId },
+        include: { _count: { select: { bookings: true } } },
+      });
+
+      if (!slot) throw new Error("Slot tidak ditemukan");
+      if (slot.status === "BLOCKED") throw new Error("Slot tidak tersedia");
+      if (slot._count.bookings >= slot.maxCapacity)
+        throw new Error("Slot sudah penuh");
+
+      const existing = await tx.booking.findUnique({
+        where: { slotId_customerId: { slotId, customerId: session.id } },
+      });
+      if (existing) throw new Error("Kamu sudah booking slot ini");
+
+      const newBooking = await tx.booking.create({
+        data: { slotId, customerId: session.id, notes },
+        include: {
+          slot: { include: { business: true, service: true } },
+          customer: true,
+        },
+      });
+
+      const totalBookings = slot._count.bookings + 1;
+      if (totalBookings >= slot.maxCapacity) {
+        await tx.slot.update({
+          where: { id: slotId },
+          data: { status: "FULL" },
+        });
+      }
+
+      return newBooking;
+    });
+
+    return NextResponse.json(booking, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.messge }, { status: 400 });
   }
