@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { getSession } from "@/src/lib/auth";
 
+function generateBookingCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `JDW-${code}`;
+}
+
 export async function GET(req: Request) {
   const session = await getSession();
   if (!session)
@@ -83,7 +92,12 @@ export async function POST(req: Request) {
       if (existing) throw new Error("Kamu sudah booking slot ini");
 
       const newBooking = await tx.booking.create({
-        data: { slotId, customerId: session.id, notes },
+        data: {
+          slotId,
+          customerId: session.id,
+          notes,
+          bookingCode: generateBookingCode(),
+        },
         include: {
           slot: { include: { business: true, service: true } },
           customer: true,
@@ -103,6 +117,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(booking, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.messge }, { status: 400 });
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
