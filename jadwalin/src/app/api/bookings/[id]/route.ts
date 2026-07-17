@@ -25,13 +25,13 @@ export async function PATCH(
 
   if (session.role === "CUSTOMER") {
     if (booking.customerId !== session.id || status !== "CANCELLED") {
-      return NextResponse.json({ error: "Forbiden" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   }
 
   if (session.role === "BUSINESS_OWNER") {
     if (booking.slot.business.ownerId !== session.id) {
-      return NextResponse.json({ error: "Forbiden" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   }
 
