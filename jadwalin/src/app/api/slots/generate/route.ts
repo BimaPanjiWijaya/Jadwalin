@@ -28,4 +28,29 @@ export async function POST(req: Request) {
 
   const openMinutes = openH * 60 + openM;
   const closeMinutes = closeH * 60 + closeM;
+
+  const slotToCreate = [];
+  for (
+    let start = openMinutes;
+    start + intervalMinutes <= closeMinutes;
+    start += intervalMinutes
+  ) {
+    const startH = Math.floor(start / 60);
+    const startM = start % 60;
+    const endH = Math.floor((start + intervalMinutes) / 60);
+    const endM = (start + intervalMinutes) % 60;
+
+    slotToCreate.push({
+      businessId,
+      serviceId,
+      slotDate: new Date(date),
+      startTime: new Date(0, 0, 0, startH, startM),
+      endTime: new Date(0, 0, 0, endH, endM),
+      maxCapacity: 1,
+    });
+  }
+
+  await prisma.slot.createMany({ data: slotToCreate });
+
+  return NextResponse.json({ created: slotToCreate.length }, { status: 201 });
 }
