@@ -55,7 +55,7 @@ export default function BookPage({
 
   useEffect(() => {
     if (!business) return;
-    fetch(`/api/slots?businessId=${business.id}&data=${date}`)
+    fetch(`/api/slots?businessId=${business.id}&date=${date}`)
       .then((r) => r.json())
       .then(setSlots);
     setSelectedSlot(null);
@@ -66,7 +66,7 @@ export default function BookPage({
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("api/bookings", {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slotId: selectedSlot.id, notes }),
@@ -76,7 +76,7 @@ export default function BookPage({
         setError(data.error);
         return;
       }
-      setSuccess("Booking berhasil! Cek email kamu untuk konfirmasi");
+      setSuccess("Booking berhasil! Cek email kamu untuk konfirmasi.");
       setTimeout(() => router.push("/my-bookings"), 2000);
     } catch {
       setError("Gagal terhubung ke server");
