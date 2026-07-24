@@ -55,10 +55,27 @@ export default function BookPage({
 
   useEffect(() => {
     if (!business) return;
-    fetch(`/api/slots?businessId=${business.id}&date=${date}`)
-      .then((r) => r.json())
-      .then(setSlots);
-    setSelectedSlot(null);
+    (async () => {
+      setError("");
+      try {
+        const res = await fetch(
+          `/api/slots?businessId=${business.id}&date=${date}`,
+        );
+        const json = await res.json();
+        if (!res.ok) {
+          setError(json?.error || "Gagal memuat slot");
+          setSlots([]);
+          return;
+        }
+        const arr = Array.isArray(json) ? json : json?.data ?? [];
+        setSlots(arr);
+      } catch {
+        setError("Gagal terhubung ke server");
+        setSlots([]);
+      } finally {
+        setSelectedSlot(null);
+      }
+    })();
   }, [business, date]);
 
   async function handleBooking() {
@@ -73,7 +90,7 @@ export default function BookPage({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error);
+        setError(data?.error || "Gagal membuat booking");
         return;
       }
       setSuccess("Booking berhasil! Cek email kamu untuk konfirmasi.");
