@@ -5,7 +5,7 @@ import { getSession } from "@/src/lib/auth";
 export async function POST(req: Request) {
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
-    return NextResponse.json({ erro: "Forbiden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     where: { id: businessId, ownerId: session.id },
   });
   if (!business)
-    return NextResponse.json({ error: "Forbiden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const [openH, openM] = openTime.split(":").map(Number);
   const [closeH, closeM] = closeTime.split(":").map(Number);
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const openMinutes = openH * 60 + openM;
   const closeMinutes = closeH * 60 + closeM;
 
-  const slotToCreate = [];
+  const slotsToCreate = [];
   for (
     let start = openMinutes;
     start + intervalMinutes <= closeMinutes;
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const endH = Math.floor((start + intervalMinutes) / 60);
     const endM = (start + intervalMinutes) % 60;
 
-    slotToCreate.push({
+    slotsToCreate.push({
       businessId,
       serviceId,
       slotDate: new Date(date),
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     });
   }
 
-  await prisma.slot.createMany({ data: slotToCreate });
+  await prisma.slot.createMany({ data: slotsToCreate });
 
-  return NextResponse.json({ created: slotToCreate.length }, { status: 201 });
+  return NextResponse.json({ created: slotsToCreate.length }, { status: 201 });
 }
