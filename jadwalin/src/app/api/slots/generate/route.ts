@@ -22,4 +22,10 @@ export async function POST(req: Request) {
   });
   if (!business)
     return NextResponse.json({ error: "Forbiden" }, { status: 403 });
+
+  const [openH, openM] = openTime.split(":").map(Number);
+  const [closeH, closeM] = closeTime.split(":").map(Number);
+
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
 }
