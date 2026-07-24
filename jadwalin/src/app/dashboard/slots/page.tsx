@@ -15,7 +15,7 @@ type Slot = {
 type Business = {
   id: string;
   name: string;
-  service: { id: string; name: string }[];
+  services: { id: string; name: string }[];
 };
 
 export default function DashboardSlotsPage() {
@@ -66,7 +66,7 @@ export default function DashboardSlotsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         businessId: business.id,
-        serviceId: fd.get("servideId"),
+        serviceId: fd.get("serviceId"),
         date,
         openTime: fd.get("openTime"),
         closeTime: fd.get("closeTime"),
