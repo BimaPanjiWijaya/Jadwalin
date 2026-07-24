@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { getSession } from "@/src/lib/auth";
+import { sendBookingConfirmationEmail } from "@/src/lib/mailer";
+import { sendBookingConfirmationTelegram } from "@/src/lib/telegram";
 
 function generateBookingCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -113,6 +115,44 @@ export async function POST(req: Request) {
       }
 
       return newBooking;
+    });
+
+    const notifData = {
+      customerName: booking.customer.name,
+      businessName: booking.slot.business.name,
+      serviceName: booking.slot.service.name,
+      date: booking.slot.slotDate.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      time: booking.slot.startTime.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      bookingCode: `JDW-${booking.id.slice(0, 6).toUpperCase()}`,
+    };
+
+    sendBookingConfirmationEmail(booking.customer.email, notifData).catch(
+      (err) => console.error("Email gagal:", err),
+    );
+
+    if (booking.customer.telegramChatId) {
+      sendBookingConfirmationTelegram(
+        booking.customer.telegramChatId,
+        notifData,
+      ).catch((err) => console.error("Telegram gagal:", err));
+    }
+
+    await prisma.notification.create({
+      data: {
+        bookingId: booking.id,
+        userId: session.id,
+        channel: booking.customer.telegramChatId ? "ALL" : "EMAIL",
+        type: "BOOKING_CONFIRMED",
+        status: "QUEUED",
+      },
     });
 
     return NextResponse.json(booking, { status: 201 });
