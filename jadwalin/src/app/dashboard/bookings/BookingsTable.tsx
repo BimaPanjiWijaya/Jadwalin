@@ -27,13 +27,19 @@ export default function BookingsTable({
   initialBookings,
   businessId,
   initialDate,
-  formatTime,
 }: {
   initialBookings: Booking[];
   businessId: string;
   initialDate: string;
-  formatTime: (d: string | Date) => string;
 }) {
+  // formatTime didefinisikan di sini, bukan diterima lewat props, karena
+  // function tidak bisa dikirim dari Server Component ke Client Component.
+  const formatTime = (d: string | Date) =>
+    new Date(d).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
   const [bookings, setBookings] = useState<Booking[]>(initialBookings || []);
   const [date, setDate] = useState(initialDate);
   const [loading, setLoading] = useState(false);

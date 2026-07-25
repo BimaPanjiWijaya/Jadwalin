@@ -64,12 +64,6 @@ export default async function BookingsPage({
     orderBy: { slot: { startTime: "asc" } },
   });
 
-  const formatTime = (date: Date) =>
-    new Date(date).toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
   // Serialize Date & Decimal ke string/number karena BookingsTable
   // (client component) mengharapkan tipe primitif.
   const serializedBookings = bookings.map((b) => ({
@@ -107,9 +101,6 @@ export default async function BookingsPage({
         initialBookings={serializedBookings}
         businessId={business.id}
         initialDate={dateParam}
-        formatTime={(d) =>
-          typeof d === "string" ? formatTime(new Date(d)) : formatTime(d)
-        }
       />
     </main>
   );

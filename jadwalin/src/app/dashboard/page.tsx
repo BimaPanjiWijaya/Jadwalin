@@ -78,12 +78,20 @@ export default async function DashboardPage() {
             {business.category}
           </span>
         </div>
-        <Link
-          href="/dashboard/slots"
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
-        >
-          Kelola Slot
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/bookings"
+            className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Lihat Semua Booking
+          </Link>
+          <Link
+            href="/dashboard/slots"
+            className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Kelola Slot
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
@@ -101,8 +109,14 @@ export default async function DashboardPage() {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-900">Antrian Hari Ini</h2>
+          <Link
+            href="/dashboard/bookings"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Lihat Semua →
+          </Link>
         </div>
         {todayBookings.length === 0 ? (
           <div className="px-5 py-10 text-center text-gray-400 text-sm">
