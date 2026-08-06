@@ -32,7 +32,11 @@ export default function LoginPage() {
         return;
       }
       router.refresh();
-      router.push("/");
+      if (data.isNewUser) {
+        router.push("/complete-profile");
+      } else {
+        router.push("/");
+      }
     } catch {
       setError("Gagal masuk dengan Google. Coba lagi.");
     }
