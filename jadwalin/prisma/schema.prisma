@@ -47,7 +47,9 @@ model User {
   name           String
   email          String   @unique
   phone          String?
-  password       String
+  password       String?               // ← ubah dari String jadi String? (optional)
+  googleId       String?  @unique @map("google_id")   // ← baris baru
+  avatarUrl      String?  @map("avatar_url")           // ← baris baru
   role           Role     @default(CUSTOMER)
   telegramChatId String?  @map("telegram_chat_id") // dari bot /start
   createdAt      DateTime @default(now()) @map("created_at")
