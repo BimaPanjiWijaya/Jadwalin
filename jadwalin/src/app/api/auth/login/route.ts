@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signToken } from "@/src/lib/jwt";
+import { error } from "console";
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
@@ -19,6 +20,15 @@ export async function POST(req: Request) {
   if (!user) {
     return NextResponse.json(
       { error: "Email atau Password salah" },
+      { status: 401 },
+    );
+  }
+
+  if (!user.password) {
+    return NextResponse.json(
+      {
+        error: "Akun ini terdaftar lewat Google. Silakan masuk dengan Google.",
+      },
       { status: 401 },
     );
   }
