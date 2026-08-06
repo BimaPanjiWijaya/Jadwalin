@@ -969,12 +969,7 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "",  // kosong agar select menampilkan "Pilih Role" dulu
-  });
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -995,14 +990,8 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error);
-        return;
-      }
-
+      if (!res.ok) { setError(data.error); return; }
       router.push("/login");
     } catch {
       setError("Gagal terhubung ke server. Coba lagi.");
@@ -1012,56 +1001,110 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm p-6 border rounded-lg">
-        <h1 className="text-2xl font-bold text-center">Daftar</h1>
+    <div className="min-h-screen flex">
+      {/* Kiri — branding */}
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-blue-600 p-12 text-white">
+        <span className="text-2xl font-bold tracking-tight">Jadwalin</span>
+        <div>
+          <h2 className="text-4xl font-bold leading-snug mb-4">
+            Mulai terima booking<br />dari sekarang
+          </h2>
+          <p className="text-blue-100 text-lg">
+            Daftarkan bisnis atau temukan layanan terbaik di sekitarmu.
+          </p>
+        </div>
+        <p className="text-blue-200 text-sm">© 2025 Jadwalin</p>
+      </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+      {/* Kanan — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Buat akun</h1>
+            <p className="text-gray-500 mt-1">Sudah punya akun?{" "}
+              <Link href="/login" className="text-blue-600 font-medium hover:underline">Masuk</Link>
+            </p>
+          </div>
 
-        <input
-          type="text"
-          placeholder="Nama lengkap"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          type="password"
-          placeholder="Password (min. 8 karakter)"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          className="border rounded px-3 py-2"
-        />
-        <select
-          value={form.role}
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-          className="border rounded px-3 py-2"
-        >
-          <option value="" disabled>Pilih Role</option>
-          <option value="CUSTOMER">Customer</option>
-          <option value="BUSINESS_OWNER">Business Owner</option>
-        </select>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                {error}
+              </div>
+            )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white rounded py-2 disabled:opacity-50"
-        >
-          {loading ? "Memproses..." : "Daftar"}
-        </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+              <input
+                type="text"
+                placeholder="John Doe"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              />
+            </div>
 
-        <p className="text-sm text-center">
-          Sudah punya akun?{" "}
-          <Link href="/login" className="text-blue-600 underline">Login</Link>
-        </p>
-      </form>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                placeholder="kamu@email.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                placeholder="Minimal 8 karakter"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Daftar sebagai</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: "CUSTOMER", label: "Customer", desc: "Cari & booking layanan" },
+                  { value: "BUSINESS_OWNER", label: "Business Owner", desc: "Kelola bisnis & terima booking" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, role: opt.value })}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      form.role === opt.value
+                        ? "border-blue-600 bg-blue-50"
+                        : "border-gray-200 bg-white hover:border-blue-300"
+                    }`}
+                  >
+                    <p className={`text-sm font-semibold ${form.role === opt.value ? "text-blue-600" : "text-gray-900"}`}>
+                      {opt.label}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white rounded-xl py-2.5 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
+            >
+              {loading ? "Membuat akun..." : "Buat Akun"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1095,14 +1138,8 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error);
-        return;
-      }
-
+      if (!res.ok) { setError(data.error); return; }
       router.push("/");
     } catch {
       setError("Gagal terhubung ke server. Coba lagi.");
@@ -1112,40 +1149,72 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm p-6 border rounded-lg">
-        <h1 className="text-2xl font-bold text-center">Login</h1>
+    <div className="min-h-screen flex">
+      {/* Kiri — branding */}
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-blue-600 p-12 text-white">
+        <span className="text-2xl font-bold tracking-tight">Jadwalin</span>
+        <div>
+          <h2 className="text-4xl font-bold leading-snug mb-4">
+            Selamat datang<br />kembali!
+          </h2>
+          <p className="text-blue-100 text-lg">
+            Masuk untuk melihat booking dan mengelola jadwal kamu.
+          </p>
+        </div>
+        <p className="text-blue-200 text-sm">© 2025 Jadwalin</p>
+      </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+      {/* Kanan — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Masuk</h1>
+            <p className="text-gray-500 mt-1">Belum punya akun?{" "}
+              <Link href="/register" className="text-blue-600 font-medium hover:underline">Daftar gratis</Link>
+            </p>
+          </div>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="border rounded px-3 py-2"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          className="border rounded px-3 py-2"
-        />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                {error}
+              </div>
+            )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white rounded py-2 disabled:opacity-50"
-        >
-          {loading ? "Memproses..." : "Login"}
-        </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                placeholder="kamu@email.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              />
+            </div>
 
-        <p className="text-sm text-center">
-          Belum punya akun?{" "}
-          <Link href="/register" className="text-blue-600 underline">Daftar</Link>
-        </p>
-      </form>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white rounded-xl py-2.5 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
+            >
+              {loading ? "Masuk..." : "Masuk"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1581,6 +1650,1000 @@ export async function POST(
   });
 
   return NextResponse.json({ logoUrl });
+}
+```
+
+---
+
+## 8b. Komponen UI — `src/components/`
+
+### Struktur folder
+
+```
+src/components/
+├── Navbar.tsx           ← server component, cek session
+├── NavbarMobileMenu.tsx ← client component, hamburger menu mobile
+├── LogoutButton.tsx     ← client component, tombol keluar
+├── Footer.tsx           ← footer sederhana
+├── BusinessCard.tsx     ← card bisnis untuk home page
+├── SlotGrid.tsx         ← grid slot tersedia untuk halaman booking
+├── BookingSummary.tsx   ← ringkasan booking sebelum konfirmasi
+├── StatCard.tsx         ← kartu statistik untuk dashboard
+└── BookingStatusBadge.tsx ← badge status booking
+```
+
+### Update `src/app/layout.tsx` — pasang Navbar & Footer
+
+```tsx
+import type { Metadata } from "next";
+import { Geist } from "next/font/google";
+import "./globals.css";
+import Navbar from "@/src/components/Navbar";
+import Footer from "@/src/components/Footer";
+
+const geist = Geist({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Jadwalin — Booking & Scheduling",
+  description: "Platform booking layanan terpercaya",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="id">
+      <body className={`${geist.className} bg-gray-50 min-h-screen flex flex-col`}>
+        <Navbar />
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+```
+
+### `src/components/LogoutButton.tsx`
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function LogoutButton() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogout() {
+    setLoading(true);
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
+
+  return (
+    <button
+      onClick={handleLogout}
+      disabled={loading}
+      className="text-sm text-gray-600 hover:text-red-500 transition-colors disabled:opacity-50"
+    >
+      {loading ? "Keluar..." : "Keluar"}
+    </button>
+  );
+}
+```
+
+### `src/components/NavbarMobileMenu.tsx`
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+type Session = { id: string; role: string; email: string } | null;
+
+export default function NavbarMobileMenu({ session }: { session: Session }) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+    setOpen(false);
+  }
+
+  return (
+    <div className="md:hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="p-2 text-gray-600 hover:text-blue-600"
+        aria-label="Menu"
+      >
+        {open ? (
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg px-6 py-4 flex flex-col gap-4 z-50">
+          <Link href="/" onClick={() => setOpen(false)} className="text-sm text-gray-700 hover:text-blue-600">
+            Beranda
+          </Link>
+          {session?.role === "CUSTOMER" && (
+            <Link href="/my-bookings" onClick={() => setOpen(false)} className="text-sm text-gray-700 hover:text-blue-600">
+              Booking Saya
+            </Link>
+          )}
+          {session?.role === "BUSINESS_OWNER" && (
+            <Link href="/dashboard" onClick={() => setOpen(false)} className="text-sm text-gray-700 hover:text-blue-600">
+              Dashboard
+            </Link>
+          )}
+          {session ? (
+            <>
+              <Link href="/profile" onClick={() => setOpen(false)} className="text-sm text-gray-700 hover:text-blue-600">
+                Profil
+              </Link>
+              <button onClick={handleLogout} className="text-sm text-red-500 text-left">
+                Keluar
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={() => setOpen(false)} className="text-sm text-gray-700">
+                Masuk
+              </Link>
+              <Link href="/register" onClick={() => setOpen(false)} className="text-sm text-blue-600 font-medium">
+                Daftar
+              </Link>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### `src/components/Navbar.tsx`
+
+```tsx
+import Link from "next/link";
+import { getSession } from "@/src/lib/auth";
+import LogoutButton from "./LogoutButton";
+import NavbarMobileMenu from "./NavbarMobileMenu";
+
+export default async function Navbar() {
+  const session = await getSession();
+
+  return (
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <Link href="/" className="text-blue-600 font-bold text-xl tracking-tight">
+          Jadwalin
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-6">
+          <Link href="/" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+            Beranda
+          </Link>
+          {session?.role === "CUSTOMER" && (
+            <Link href="/my-bookings" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+              Booking Saya
+            </Link>
+          )}
+          {session?.role === "BUSINESS_OWNER" && (
+            <Link href="/dashboard" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+              Dashboard
+            </Link>
+          )}
+          {session ? (
+            <div className="flex items-center gap-4">
+              <Link href="/profile" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                Profil
+              </Link>
+              <LogoutButton />
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href="/login" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+                Masuk
+              </Link>
+              <Link
+                href="/register"
+                className="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Daftar
+              </Link>
+            </div>
+          )}
+        </nav>
+
+        <NavbarMobileMenu session={session} />
+      </div>
+    </header>
+  );
+}
+```
+
+### `src/components/Footer.tsx`
+
+```tsx
+import Link from "next/link";
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-gray-200 bg-white mt-auto">
+      <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <span className="text-blue-600 font-bold text-lg">Jadwalin</span>
+          <p className="text-xs text-gray-400 mt-1">
+            Platform booking & scheduling terpercaya
+          </p>
+        </div>
+        <div className="flex gap-6 text-sm text-gray-500">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Beranda</Link>
+          <Link href="/register" className="hover:text-blue-600 transition-colors">Daftar</Link>
+          <Link href="/login" className="hover:text-blue-600 transition-colors">Masuk</Link>
+        </div>
+        <p className="text-xs text-gray-400">© 2025 Jadwalin</p>
+      </div>
+    </footer>
+  );
+}
+```
+
+### `src/components/BusinessCard.tsx`
+
+```tsx
+import Link from "next/link";
+
+type Service = { id: string; name: string };
+
+type Props = {
+  slug: string;
+  name: string;
+  category: string;
+  address?: string | null;
+  logoUrl?: string | null;
+  services: Service[];
+};
+
+export default function BusinessCard({ slug, name, category, address, logoUrl, services }: Props) {
+  return (
+    <Link
+      href={`/book/${slug}`}
+      className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md hover:border-blue-200 transition-all"
+    >
+      {logoUrl ? (
+        <img src={logoUrl} alt={name} className="w-full h-44 object-cover" />
+      ) : (
+        <div className="w-full h-44 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+          <span className="text-5xl font-bold text-blue-200">{name.charAt(0)}</span>
+        </div>
+      )}
+      <div className="p-4">
+        <h2 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+          {name}
+        </h2>
+        <span className="inline-block text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium mt-1 capitalize">
+          {category}
+        </span>
+        {address && (
+          <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+            <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {address}
+          </p>
+        )}
+        {services.length > 0 && (
+          <div className="mt-3 flex gap-1 flex-wrap">
+            {services.map((svc) => (
+              <span key={svc.id} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {svc.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </Link>
+  );
+}
+```
+
+### `src/components/StatCard.tsx`
+
+```tsx
+type Props = {
+  label: string;
+  value: number | string;
+  color?: string;
+};
+
+export default function StatCard({ label, value, color = "text-blue-600" }: Props) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 text-center shadow-sm">
+      <p className={`text-3xl font-bold ${color}`}>{value}</p>
+      <p className="text-sm text-gray-500 mt-1">{label}</p>
+    </div>
+  );
+}
+```
+
+### `src/components/BookingStatusBadge.tsx`
+
+```tsx
+const STATUS_STYLE: Record<string, string> = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  CONFIRMED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-red-100 text-red-800",
+  DONE: "bg-gray-100 text-gray-600",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "Menunggu",
+  CONFIRMED: "Dikonfirmasi",
+  CANCELLED: "Dibatalkan",
+  DONE: "Selesai",
+};
+
+export default function BookingStatusBadge({ status }: { status: string }) {
+  return (
+    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_STYLE[status] ?? "bg-gray-100 text-gray-600"}`}>
+      {STATUS_LABEL[status] ?? status}
+    </span>
+  );
+}
+```
+
+---
+
+### Update halaman dengan komponen & tampilan profesional
+
+**`src/app/page.tsx` (Home — pakai BusinessCard):**
+
+```tsx
+import { prisma } from "@/src/lib/prisma";
+import BusinessCard from "@/src/components/BusinessCard";
+import Link from "next/link";
+
+const CATEGORIES = ["Semua", "barbershop", "salon", "klinik", "gym", "fotografer"];
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
+
+  const businesses = await prisma.business.findMany({
+    where: {
+      isActive: true,
+      ...(category && category !== "Semua" ? { category } : {}),
+    },
+    include: { services: { where: { isActive: true }, take: 3 } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-10">
+      {/* Hero */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-bold text-gray-900 mb-3">
+          Temukan & Booking Layanan
+        </h1>
+        <p className="text-gray-500 text-lg">
+          Jadwalkan appointment dengan mudah dan cepat
+        </p>
+      </div>
+
+      {/* Filter kategori */}
+      <div className="flex gap-2 flex-wrap justify-center mb-8">
+        {CATEGORIES.map((cat) => (
+          <Link
+            key={cat}
+            href={cat === "Semua" ? "/" : `/?category=${cat}`}
+            className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+              category === cat || (!category && cat === "Semua")
+                ? "bg-blue-600 text-white border-blue-600"
+                : "border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600 bg-white"
+            }`}
+          >
+            {cat}
+          </Link>
+        ))}
+      </div>
+
+      {/* Grid bisnis */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {businesses.map((biz) => (
+          <BusinessCard
+            key={biz.id}
+            slug={biz.slug}
+            name={biz.name}
+            category={biz.category}
+            address={biz.address}
+            logoUrl={biz.logoUrl}
+            services={biz.services}
+          />
+        ))}
+        {businesses.length === 0 && (
+          <div className="col-span-3 text-center py-20">
+            <p className="text-gray-400 text-lg">Belum ada bisnis tersedia.</p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+```
+
+**`src/app/book/[slug]/page.tsx` (Booking — tampilan profesional):**
+
+```tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+type Service = { id: string; name: string; durationMinutes: number; price: number };
+type Slot = {
+  id: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  service: Service;
+  _count: { bookings: number };
+  maxCapacity: number;
+};
+type Business = {
+  id: string;
+  name: string;
+  category: string;
+  description: string | null;
+  address: string | null;
+  logoUrl: string | null;
+  services: Service[];
+};
+
+export default function BookPage({ params }: { params: Promise<{ slug: string }> }) {
+  const router = useRouter();
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    params.then(({ slug }) => {
+      fetch(`/api/businesses/${slug}`)
+        .then((r) => r.json())
+        .then(setBusiness);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (!business) return;
+    fetch(`/api/slots?businessId=${business.id}&date=${date}`)
+      .then((r) => r.json())
+      .then(setSlots);
+    setSelectedSlot(null);
+  }, [business, date]);
+
+  async function handleBooking() {
+    if (!selectedSlot) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slotId: selectedSlot.id, notes }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error); return; }
+      setSuccess("Booking berhasil! Cek email kamu untuk konfirmasi.");
+      setTimeout(() => router.push("/my-bookings"), 2000);
+    } catch {
+      setError("Gagal terhubung ke server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!business) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Memuat...</div>
+      </div>
+    );
+  }
+
+  const formatTime = (isoTime: string) =>
+    new Date(isoTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+  const formatPrice = (price: number) =>
+    price > 0 ? `Rp ${price.toLocaleString("id-ID")}` : "Gratis";
+
+  return (
+    <main className="max-w-3xl mx-auto px-4 py-8">
+      {/* Header bisnis */}
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-6 shadow-sm">
+        {business.logoUrl && (
+          <img src={business.logoUrl} alt={business.name} className="w-full h-48 object-cover" />
+        )}
+        <div className="p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
+              <span className="inline-block text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium mt-1 capitalize">
+                {business.category}
+              </span>
+            </div>
+          </div>
+          {business.description && (
+            <p className="text-sm text-gray-500 mt-3">{business.description}</p>
+          )}
+          {business.address && (
+            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+              {business.address}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-6">
+        <div className="md:col-span-3 space-y-6">
+          {/* Pilih tanggal */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <h2 className="font-semibold text-gray-900 mb-3">Pilih Tanggal</h2>
+            <input
+              type="date"
+              value={date}
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Grid slot */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <h2 className="font-semibold text-gray-900 mb-4">Pilih Waktu</h2>
+            {slots.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 text-sm">Tidak ada slot tersedia untuk tanggal ini.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {slots.map((slot) => {
+                  const isFull = slot._count.bookings >= slot.maxCapacity;
+                  const isBlocked = slot.status === "BLOCKED";
+                  const isSelected = selectedSlot?.id === slot.id;
+                  const unavailable = isFull || isBlocked;
+                  return (
+                    <button
+                      key={slot.id}
+                      disabled={unavailable}
+                      onClick={() => setSelectedSlot(slot)}
+                      className={`p-2.5 rounded-xl border text-sm text-center transition-all ${
+                        isSelected
+                          ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                          : unavailable
+                            ? "bg-gray-50 text-gray-300 cursor-not-allowed border-gray-100"
+                            : "bg-white hover:border-blue-400 hover:text-blue-600 border-gray-200"
+                      }`}
+                    >
+                      <div className="font-medium">{formatTime(slot.startTime)}</div>
+                      <div className="text-xs opacity-70 mt-0.5">{slot.service.name}</div>
+                      {isFull && <div className="text-xs mt-0.5 text-red-400">Penuh</div>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Panel konfirmasi */}
+        <div className="md:col-span-2">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm sticky top-24">
+            <h2 className="font-semibold text-gray-900 mb-4">Ringkasan Booking</h2>
+            {!selectedSlot ? (
+              <p className="text-sm text-gray-400 text-center py-6">
+                Pilih tanggal dan waktu terlebih dahulu
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-gray-50 rounded-xl p-3 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Layanan</span>
+                    <span className="font-medium">{selectedSlot.service.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Waktu</span>
+                    <span className="font-medium">
+                      {formatTime(selectedSlot.startTime)} – {formatTime(selectedSlot.endTime)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Tanggal</span>
+                    <span className="font-medium">
+                      {new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="text-gray-500">Harga</span>
+                    <span className="font-bold text-blue-600">{formatPrice(selectedSlot.service.price)}</span>
+                  </div>
+                </div>
+                <textarea
+                  placeholder="Catatan (opsional)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={2}
+                />
+                {error && <p className="text-red-500 text-xs">{error}</p>}
+                {success && <p className="text-green-600 text-xs">{success}</p>}
+                <button
+                  onClick={handleBooking}
+                  disabled={loading}
+                  className="w-full bg-blue-600 text-white rounded-xl py-2.5 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Memproses..." : "Konfirmasi Booking"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+```
+
+**`src/app/my-bookings/page.tsx` (Riwayat Booking — pakai BookingStatusBadge):**
+
+```tsx
+import { getSession } from "@/src/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import BookingStatusBadge from "@/src/components/BookingStatusBadge";
+
+export default async function MyBookingsPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
+  const bookings = await prisma.booking.findMany({
+    where: { customerId: session.id },
+    include: { slot: { include: { business: true, service: true } } },
+    orderBy: { bookedAt: "desc" },
+  });
+
+  const formatDate = (date: Date) =>
+    new Date(date).toLocaleDateString("id-ID", {
+      weekday: "long", year: "numeric", month: "long", day: "numeric",
+    });
+
+  const formatTime = (date: Date) =>
+    new Date(date).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <main className="max-w-2xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Riwayat Booking</h1>
+
+      {bookings.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+          <p className="text-gray-400 mb-4">Kamu belum punya booking.</p>
+          <Link
+            href="/"
+            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Cari Layanan
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h2 className="font-semibold text-gray-900">{booking.slot.business.name}</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">{booking.slot.service.name}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {formatDate(booking.slot.slotDate)} · {formatTime(booking.slot.startTime)} – {formatTime(booking.slot.endTime)}
+                  </p>
+                  {booking.bookingCode && (
+                    <p className="text-xs text-gray-400 mt-1 font-mono">#{booking.bookingCode}</p>
+                  )}
+                </div>
+                <BookingStatusBadge status={booking.status} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}
+```
+
+**`src/app/dashboard/page.tsx` (Dashboard — pakai StatCard & BookingStatusBadge):**
+
+```tsx
+import { getSession } from "@/src/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import StatCard from "@/src/components/StatCard";
+import BookingStatusBadge from "@/src/components/BookingStatusBadge";
+
+export default async function DashboardPage() {
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") redirect("/login");
+
+  const business = await prisma.business.findFirst({ where: { ownerId: session.id } });
+
+  if (!business) {
+    return (
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Selamat datang!</h1>
+          <p className="text-gray-500 mb-6">Kamu belum punya bisnis. Buat sekarang untuk mulai menerima booking.</p>
+          <Link href="/dashboard/setup" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-colors">
+            Buat Bisnis
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const [todayBookings, totalSlots, totalBookings] = await Promise.all([
+    prisma.booking.findMany({
+      where: { slot: { businessId: business.id, slotDate: { gte: today, lt: tomorrow } }, status: { not: "CANCELLED" } },
+      include: { customer: { select: { name: true, email: true } }, slot: { include: { service: true } } },
+      orderBy: { slot: { startTime: "asc" } },
+    }),
+    prisma.slot.count({ where: { businessId: business.id } }),
+    prisma.booking.count({ where: { slot: { businessId: business.id }, status: { not: "CANCELLED" } } }),
+  ]);
+
+  const formatTime = (date: Date) =>
+    new Date(date).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <main className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
+          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium capitalize">
+            {business.category}
+          </span>
+        </div>
+        <Link
+          href="/dashboard/slots"
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          Kelola Slot
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <StatCard label="Booking Hari Ini" value={todayBookings.length} />
+        <StatCard label="Total Slot" value={totalSlots} color="text-purple-600" />
+        <StatCard label="Total Booking" value={totalBookings} color="text-green-600" />
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-900">Antrian Hari Ini</h2>
+        </div>
+        {todayBookings.length === 0 ? (
+          <div className="px-5 py-10 text-center text-gray-400 text-sm">
+            Tidak ada booking hari ini.
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {todayBookings.map((booking) => (
+              <div key={booking.id} className="px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div>
+                  <p className="font-medium text-gray-900">{booking.customer.name}</p>
+                  <p className="text-sm text-gray-500">{booking.slot.service.name}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {formatTime(booking.slot.startTime)} – {formatTime(booking.slot.endTime)}
+                  </p>
+                </div>
+                <BookingStatusBadge status={booking.status} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+```
+
+**`src/app/profile/page.tsx` (Profil — tampilan profesional):**
+
+```tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+
+type User = { id: string; name: string; email: string; role: string; telegramChatId: string | null };
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [chatId, setChatId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me").then((r) => r.json()).then(setUser);
+  }, []);
+
+  async function saveTelegram(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/profile/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegramChatId: chatId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsSuccess(true);
+        setMessage("Telegram berhasil dihubungkan!");
+        setUser((prev) => prev ? { ...prev, telegramChatId: chatId } : prev);
+      } else {
+        setIsSuccess(false);
+        setMessage(data.error);
+      }
+    } catch {
+      setMessage("Gagal terhubung ke server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function disconnectTelegram() {
+    setLoading(true);
+    await fetch("/api/profile/telegram", { method: "DELETE" });
+    setUser((prev) => prev ? { ...prev, telegramChatId: null } : prev);
+    setChatId("");
+    setIsSuccess(false);
+    setMessage("Telegram berhasil diputus.");
+    setLoading(false);
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Memuat...</div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="max-w-lg mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Profil</h1>
+
+      {/* Info akun */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-4 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+            <span className="text-blue-600 font-bold text-lg">{user.name.charAt(0).toUpperCase()}</span>
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900">{user.name}</p>
+            <p className="text-sm text-gray-500">{user.email}</p>
+            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium capitalize">
+              {user.role === "BUSINESS_OWNER" ? "Business Owner" : "Customer"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Telegram */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" />
+          </svg>
+          <h2 className="font-semibold text-gray-900">Notifikasi Telegram</h2>
+        </div>
+
+        {user.telegramChatId ? (
+          <div>
+            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <p className="text-sm text-green-700 font-medium">Telegram terhubung</p>
+            </div>
+            <p className="text-xs text-gray-400 mb-3">Chat ID: <span className="font-mono">{user.telegramChatId}</span></p>
+            <button
+              onClick={disconnectTelegram}
+              disabled={loading}
+              className="text-sm text-red-500 hover:text-red-600 underline"
+            >
+              Putus koneksi
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div className="bg-blue-50 rounded-xl p-3 mb-4 text-sm text-gray-600 space-y-1">
+              <p>1. Buka{" "}
+                <a
+                  href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 font-medium underline"
+                >
+                  @{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}
+                </a>{" "}
+                dan ketik <span className="font-mono">/start</span>
+              </p>
+              <p>2. Copy Chat ID yang dikirim bot</p>
+              <p>3. Paste di bawah ini dan klik Simpan</p>
+            </div>
+            <form onSubmit={saveTelegram} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Chat ID"
+                value={chatId}
+                onChange={(e) => setChatId(e.target.value)}
+                className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                disabled={loading || !chatId}
+                className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                Simpan
+              </button>
+            </form>
+          </div>
+        )}
+
+        {message && (
+          <p className={`text-sm mt-3 ${isSuccess ? "text-green-600" : "text-red-500"}`}>
+            {message}
+          </p>
+        )}
+      </div>
+    </main>
+  );
 }
 ```
 
@@ -2126,6 +3189,374 @@ export async function POST(req: Request) {
 }
 ```
 
+**Halaman Home — `src/app/page.tsx`:**
+
+```tsx
+import Link from "next/link";
+import { prisma } from "@/src/lib/prisma";
+
+const CATEGORIES = ["Semua", "barbershop", "salon", "klinik", "gym", "fotografer"];
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
+
+  const businesses = await prisma.business.findMany({
+    where: {
+      isActive: true,
+      ...(category && category !== "Semua" ? { category } : {}),
+    },
+    include: {
+      services: { where: { isActive: true }, take: 3 },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return (
+    <main className="min-h-screen p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Temukan Layanan</h1>
+
+      <div className="flex gap-2 flex-wrap mb-6">
+        {CATEGORIES.map((cat) => (
+          <Link
+            key={cat}
+            href={cat === "Semua" ? "/" : `/?category=${cat}`}
+            className={`px-4 py-1.5 rounded-full border text-sm ${
+              category === cat || (!category && cat === "Semua")
+                ? "bg-blue-600 text-white border-blue-600"
+                : "border-gray-300 hover:border-blue-400"
+            }`}
+          >
+            {cat}
+          </Link>
+        ))}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {businesses.map((biz) => (
+          <Link
+            key={biz.id}
+            href={`/book/${biz.slug}`}
+            className="border rounded-xl p-4 hover:shadow-md transition-shadow"
+          >
+            {biz.logoUrl && (
+              <img
+                src={biz.logoUrl}
+                alt={biz.name}
+                className="w-full h-40 object-cover rounded-lg mb-3"
+              />
+            )}
+            <h2 className="text-lg font-semibold">{biz.name}</h2>
+            <p className="text-sm text-gray-500 capitalize">{biz.category}</p>
+            {biz.address && (
+              <p className="text-sm text-gray-400 mt-1">{biz.address}</p>
+            )}
+            {biz.services.length > 0 && (
+              <div className="mt-2 flex gap-1 flex-wrap">
+                {biz.services.map((svc) => (
+                  <span
+                    key={svc.id}
+                    className="text-xs bg-gray-100 px-2 py-0.5 rounded-full"
+                  >
+                    {svc.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </Link>
+        ))}
+        {businesses.length === 0 && (
+          <p className="text-gray-400 col-span-2">Belum ada bisnis tersedia.</p>
+        )}
+      </div>
+    </main>
+  );
+}
+```
+
+**Halaman Book — `src/app/book/[slug]/page.tsx`:**
+
+```tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+type Service = {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  price: number;
+};
+
+type Slot = {
+  id: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  service: Service;
+  _count: { bookings: number };
+  maxCapacity: number;
+};
+
+type Business = {
+  id: string;
+  name: string;
+  category: string;
+  description: string | null;
+  address: string | null;
+  logoUrl: string | null;
+  services: Service[];
+};
+
+export default function BookPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const router = useRouter();
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    params.then(({ slug }) => {
+      fetch(`/api/businesses/${slug}`)
+        .then((r) => r.json())
+        .then(setBusiness);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (!business) return;
+    fetch(`/api/slots?businessId=${business.id}&date=${date}`)
+      .then((r) => r.json())
+      .then(setSlots);
+    setSelectedSlot(null);
+  }, [business, date]);
+
+  async function handleBooking() {
+    if (!selectedSlot) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slotId: selectedSlot.id, notes }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error);
+        return;
+      }
+      setSuccess("Booking berhasil! Cek email kamu untuk konfirmasi.");
+      setTimeout(() => router.push("/my-bookings"), 2000);
+    } catch {
+      setError("Gagal terhubung ke server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!business) return <div className="p-6">Memuat...</div>;
+
+  const formatTime = (isoTime: string) =>
+    new Date(isoTime).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <main className="min-h-screen p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-1">{business.name}</h1>
+      <p className="text-gray-500 capitalize mb-6">{business.category}</p>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-1">Pilih Tanggal</label>
+        <input
+          type="date"
+          value={date}
+          min={new Date().toISOString().split("T")[0]}
+          onChange={(e) => setDate(e.target.value)}
+          className="border rounded px-3 py-2"
+        />
+      </div>
+
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold mb-3">Slot Tersedia</h2>
+        {slots.length === 0 ? (
+          <p className="text-gray-400">Tidak ada slot tersedia untuk tanggal ini.</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {slots.map((slot) => {
+              const isFull = slot._count.bookings >= slot.maxCapacity;
+              const isBlocked = slot.status === "BLOCKED";
+              const isSelected = selectedSlot?.id === slot.id;
+              const unavailable = isFull || isBlocked;
+              return (
+                <button
+                  key={slot.id}
+                  disabled={unavailable}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`p-2 rounded-lg border text-sm text-center transition-colors ${
+                    isSelected
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : unavailable
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                        : "hover:border-blue-400 border-gray-300"
+                  }`}
+                >
+                  {formatTime(slot.startTime)}
+                  <div className="text-xs opacity-70">{slot.service.name}</div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {selectedSlot && (
+        <div className="border rounded-xl p-4 mb-4">
+          <h3 className="font-semibold mb-3">Konfirmasi Booking</h3>
+          <div className="text-sm text-gray-600 mb-3 space-y-1">
+            <p>
+              Layanan: <strong>{selectedSlot.service.name}</strong>
+            </p>
+            <p>
+              Waktu:{" "}
+              <strong>
+                {formatTime(selectedSlot.startTime)} –{" "}
+                {formatTime(selectedSlot.endTime)}
+              </strong>
+            </p>
+            <p>
+              Tanggal:{" "}
+              <strong>
+                {new Date(date).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </strong>
+            </p>
+          </div>
+          <textarea
+            placeholder="Catatan (opsional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="w-full border rounded px-3 py-2 text-sm mb-3"
+            rows={2}
+          />
+          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+          {success && <p className="text-green-600 text-sm mb-2">{success}</p>}
+          <button
+            onClick={handleBooking}
+            disabled={loading}
+            className="w-full bg-blue-600 text-white rounded py-2 disabled:opacity-50"
+          >
+            {loading ? "Memproses..." : "Konfirmasi Booking"}
+          </button>
+        </div>
+      )}
+    </main>
+  );
+}
+```
+
+**Halaman My Bookings — `src/app/my-bookings/page.tsx`:**
+
+```tsx
+import { getSession } from "@/src/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+
+const STATUS_COLOR: Record<string, string> = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  CONFIRMED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-red-100 text-red-800",
+  DONE: "bg-gray-100 text-gray-800",
+};
+
+export default async function MyBookingsPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
+  const bookings = await prisma.booking.findMany({
+    where: { customerId: session.id },
+    include: {
+      slot: { include: { business: true, service: true } },
+    },
+    orderBy: { bookedAt: "desc" },
+  });
+
+  const formatDate = (date: Date) =>
+    new Date(date).toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+  const formatTime = (date: Date) =>
+    new Date(date).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <main className="min-h-screen p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Riwayat Booking</h1>
+
+      {bookings.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-400 mb-4">Belum ada booking.</p>
+          <Link href="/" className="text-blue-600 underline">
+            Temukan layanan
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="border rounded-xl p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="font-semibold">{booking.slot.business.name}</h2>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[booking.status] ?? ""}`}
+                >
+                  {booking.status}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">{booking.slot.service.name}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {formatDate(booking.slot.slotDate)} ·{" "}
+                {formatTime(booking.slot.startTime)} –{" "}
+                {formatTime(booking.slot.endTime)}
+              </p>
+              {booking.bookingCode && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Kode: {booking.bookingCode}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}
+```
+
 ---
 
 ### Minggu 3 — Business dashboard
@@ -2210,6 +3641,333 @@ export async function POST(req: Request) {
 }
 ```
 
+**Halaman Dashboard — `src/app/dashboard/page.tsx`:**
+
+```tsx
+import { getSession } from "@/src/lib/auth";
+import { prisma } from "@/src/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+
+export default async function DashboardPage() {
+  const session = await getSession();
+  if (!session || session.role !== "BUSINESS_OWNER") redirect("/login");
+
+  const business = await prisma.business.findFirst({
+    where: { ownerId: session.id },
+  });
+
+  if (!business) {
+    return (
+      <main className="min-h-screen p-6 max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        <p className="text-gray-500 mb-4">Kamu belum punya bisnis.</p>
+        <Link
+          href="/dashboard/setup"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+        >
+          Buat Bisnis Sekarang
+        </Link>
+      </main>
+    );
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const [todayBookings, totalSlots, totalBookings] = await Promise.all([
+    prisma.booking.findMany({
+      where: {
+        slot: {
+          businessId: business.id,
+          slotDate: { gte: today, lt: tomorrow },
+        },
+        status: { not: "CANCELLED" },
+      },
+      include: {
+        customer: { select: { name: true, email: true } },
+        slot: { include: { service: true } },
+      },
+      orderBy: { slot: { startTime: "asc" } },
+    }),
+    prisma.slot.count({ where: { businessId: business.id } }),
+    prisma.booking.count({
+      where: {
+        slot: { businessId: business.id },
+        status: { not: "CANCELLED" },
+      },
+    }),
+  ]);
+
+  const formatTime = (date: Date) =>
+    new Date(date).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <main className="min-h-screen p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-1">{business.name}</h1>
+      <p className="text-gray-500 mb-6 capitalize">{business.category}</p>
+
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="border rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-blue-600">
+            {todayBookings.length}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">Booking Hari Ini</p>
+        </div>
+        <div className="border rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-blue-600">{totalSlots}</p>
+          <p className="text-sm text-gray-500 mt-1">Total Slot</p>
+        </div>
+        <div className="border rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-blue-600">{totalBookings}</p>
+          <p className="text-sm text-gray-500 mt-1">Total Booking</p>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg font-semibold">Antrian Hari Ini</h2>
+        <Link href="/dashboard/slots" className="text-blue-600 text-sm underline">
+          Kelola Slot →
+        </Link>
+      </div>
+
+      {todayBookings.length === 0 ? (
+        <p className="text-gray-400">Tidak ada booking hari ini.</p>
+      ) : (
+        <div className="space-y-3">
+          {todayBookings.map((booking) => (
+            <div
+              key={booking.id}
+              className="border rounded-xl p-4 flex justify-between items-center"
+            >
+              <div>
+                <p className="font-medium">{booking.customer.name}</p>
+                <p className="text-sm text-gray-500">
+                  {booking.slot.service.name}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {formatTime(booking.slot.startTime)} –{" "}
+                  {formatTime(booking.slot.endTime)}
+                </p>
+              </div>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  booking.status === "CONFIRMED"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {booking.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}
+```
+
+**Halaman Dashboard Slots — `src/app/dashboard/slots/page.tsx`:**
+
+```tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+
+type Slot = {
+  id: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  service: { id: string; name: string };
+  _count: { bookings: number };
+  maxCapacity: number;
+};
+
+type Business = {
+  id: string;
+  name: string;
+  services: { id: string; name: string }[];
+};
+
+export default function DashboardSlotsPage() {
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/businesses")
+      .then((r) => r.json())
+      .then((data: Business[]) => {
+        if (data.length > 0) setBusiness(data[0]);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!business) return;
+    fetchSlots();
+  }, [business, date]);
+
+  async function fetchSlots() {
+    if (!business) return;
+    const res = await fetch(
+      `/api/slots?businessId=${business.id}&date=${date}`,
+    );
+    const data = await res.json();
+    setSlots(data);
+  }
+
+  async function toggleBlock(slot: Slot) {
+    const newStatus = slot.status === "BLOCKED" ? "AVAILABLE" : "BLOCKED";
+    await fetch(`/api/slots/${slot.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    fetchSlots();
+  }
+
+  async function handleGenerate(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!business) return;
+    setLoading(true);
+    const fd = new FormData(e.currentTarget);
+    await fetch("/api/slots/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessId: business.id,
+        serviceId: fd.get("serviceId"),
+        date,
+        openTime: fd.get("openTime"),
+        closeTime: fd.get("closeTime"),
+        intervalMinutes: Number(fd.get("interval")),
+      }),
+    });
+    setLoading(false);
+    fetchSlots();
+  }
+
+  const formatTime = (isoTime: string) =>
+    new Date(isoTime).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <main className="min-h-screen p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Kelola Slot</h1>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Tanggal</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="border rounded px-3 py-2"
+        />
+      </div>
+
+      <form onSubmit={handleGenerate} className="border rounded-xl p-4 mb-6">
+        <h2 className="font-semibold mb-3">Generate Slot Otomatis</h2>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-sm">Layanan</label>
+            <select
+              name="serviceId"
+              className="w-full border rounded px-2 py-1.5 mt-0.5 text-sm"
+              required
+            >
+              {business?.services.map((svc) => (
+                <option key={svc.id} value={svc.id}>
+                  {svc.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-sm">Interval (menit)</label>
+            <input
+              name="interval"
+              type="number"
+              defaultValue="30"
+              min="15"
+              className="w-full border rounded px-2 py-1.5 mt-0.5"
+            />
+          </div>
+          <div>
+            <label className="text-sm">Jam Buka</label>
+            <input
+              name="openTime"
+              type="time"
+              defaultValue="09:00"
+              className="w-full border rounded px-2 py-1.5 mt-0.5"
+            />
+          </div>
+          <div>
+            <label className="text-sm">Jam Tutup</label>
+            <input
+              name="closeTime"
+              type="time"
+              defaultValue="17:00"
+              className="w-full border rounded px-2 py-1.5 mt-0.5"
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 text-sm"
+        >
+          {loading ? "Membuat..." : "Generate Slot"}
+        </button>
+      </form>
+
+      <h2 className="font-semibold mb-3">Slot pada {date}</h2>
+      {slots.length === 0 ? (
+        <p className="text-gray-400">Belum ada slot untuk tanggal ini.</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {slots.map((slot) => (
+            <div
+              key={slot.id}
+              className={`border rounded-lg p-3 ${
+                slot.status === "BLOCKED" ? "bg-gray-100 opacity-60" : ""
+              }`}
+            >
+              <p className="font-medium text-sm">
+                {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
+              </p>
+              <p className="text-xs text-gray-500">{slot.service.name}</p>
+              <p className="text-xs text-gray-400 mb-2">
+                {slot._count.bookings}/{slot.maxCapacity} booking
+              </p>
+              <button
+                onClick={() => toggleBlock(slot)}
+                className={`text-xs px-2 py-1 rounded ${
+                  slot.status === "BLOCKED"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {slot.status === "BLOCKED" ? "Unblock" : "Block"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}
+```
+
 ---
 
 ### Minggu 4 — Notifikasi, polish, deploy
@@ -2227,6 +3985,138 @@ export async function POST(req: Request) {
 - [ ] Mobile responsive semua halaman
 - [ ] `npm run build` sukses tanpa TypeScript error
 - [ ] Deploy ke Vercel (lihat bagian 12)
+
+**Halaman Profil — `src/app/profile/page.tsx`:**
+
+```tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  telegramChatId: string | null;
+};
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [chatId, setChatId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then(setUser);
+  }, []);
+
+  async function saveTelegram(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/profile/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegramChatId: chatId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("Telegram berhasil dihubungkan!");
+        setUser((prev) =>
+          prev ? { ...prev, telegramChatId: chatId } : prev,
+        );
+      } else {
+        setMessage(data.error);
+      }
+    } catch {
+      setMessage("Gagal terhubung ke server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function disconnectTelegram() {
+    setLoading(true);
+    await fetch("/api/profile/telegram", { method: "DELETE" });
+    setUser((prev) => (prev ? { ...prev, telegramChatId: null } : prev));
+    setChatId("");
+    setMessage("Telegram berhasil diputus.");
+    setLoading(false);
+  }
+
+  if (!user) return <div className="p-6">Memuat...</div>;
+
+  return (
+    <main className="min-h-screen p-6 max-w-lg mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Profil</h1>
+
+      <div className="border rounded-xl p-4 mb-6">
+        <p className="font-semibold">{user.name}</p>
+        <p className="text-sm text-gray-500">{user.email}</p>
+      </div>
+
+      <div className="border rounded-xl p-4">
+        <h2 className="font-semibold mb-3">Notifikasi Telegram</h2>
+
+        {user.telegramChatId ? (
+          <div>
+            <p className="text-sm text-green-600 mb-3">
+              ✓ Telegram sudah terhubung (Chat ID: {user.telegramChatId})
+            </p>
+            <button
+              onClick={disconnectTelegram}
+              disabled={loading}
+              className="text-sm text-red-600 underline"
+            >
+              Putus koneksi Telegram
+            </button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-gray-500 mb-3">
+              1. Buka{" "}
+              <a
+                href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                @{process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}
+              </a>{" "}
+              di Telegram dan ketik /start
+              <br />
+              2. Copy Chat ID yang dikirim bot
+              <br />
+              3. Paste di bawah dan simpan
+            </p>
+            <form onSubmit={saveTelegram} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Chat ID dari bot"
+                value={chatId}
+                onChange={(e) => setChatId(e.target.value)}
+                className="flex-1 border rounded px-3 py-2 text-sm"
+              />
+              <button
+                type="submit"
+                disabled={loading || !chatId}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+              >
+                Simpan
+              </button>
+            </form>
+          </div>
+        )}
+
+        {message && <p className="text-sm mt-2 text-gray-600">{message}</p>}
+      </div>
+    </main>
+  );
+}
+```
 
 ---
 
