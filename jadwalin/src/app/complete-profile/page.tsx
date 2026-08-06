@@ -7,7 +7,7 @@ const roles = [
   { value: "CUSTOMER", label: "Customer", desc: "Saya mau booking layanan" },
   {
     value: "BUSINESS_OWNER",
-    label: "BUsiness Owner",
+    label: "Business Owner",
     desc: "Saya mau kelola bisnis & jadwal",
   },
 ];
