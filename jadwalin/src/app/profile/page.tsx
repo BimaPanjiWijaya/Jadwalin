@@ -18,9 +18,15 @@ export default function ProfilePage() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then(setUser);
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        setUser(data);
+      } catch {
+        setMessage("Gagal memuat profil");
+      }
+    })();
   }, []);
 
   async function saveTelegram(e: React.SubmitEvent<HTMLFormElement>) {
