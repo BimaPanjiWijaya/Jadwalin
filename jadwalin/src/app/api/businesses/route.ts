@@ -1,9 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
+  const mine = searchParams.get("mine");
+
+  if (mine) {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const myBusinesses = await prisma.business.findMany({
+      where: { ownerId: session.id },
+      include: {
+        services: { where: { isActive: true } },
+        _count: { select: { slots: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return NextResponse.json(myBusinesses);
+  }
 
   const businesses = await prisma.business.findMany({
     where: {
@@ -20,7 +38,6 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { getSession } = await import("@/src/lib/auth");
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
