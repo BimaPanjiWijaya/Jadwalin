@@ -134,15 +134,23 @@ export async function POST(req: Request) {
       bookingCode: `JDW-${booking.id.slice(0, 6).toUpperCase()}`,
     };
 
-    sendBookingConfirmationEmail(booking.customer.email, notifData).catch(
-      (err) => console.error("Email gagal:", err),
-    );
+    (async () => {
+      try {
+        await sendBookingConfirmationEmail(booking.customer.email, notifData);
+      } catch (err) {
+        console.error("Email gagal:", err);
+      }
+    })();
 
-    if (booking.customer.telegramChatId) {
-      sendBookingConfirmationTelegram(
-        booking.customer.telegramChatId,
-        notifData,
-      ).catch((err) => console.error("Telegram gagal:", err));
+    const chatId = booking.customer.telegramChatId;
+    if (chatId) {
+      (async () => {
+        try {
+          await sendBookingConfirmationTelegram(chatId, notifData);
+        } catch (err) {
+          console.error("Telegram gagal:", err);
+        }
+      })();
     }
 
     await prisma.notification.create({
