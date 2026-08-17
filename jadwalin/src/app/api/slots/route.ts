@@ -37,28 +37,19 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
-    return NextResponse.json(
-      { error: "Forbidden" },
-      {
-        status: 403,
-      },
-    );
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { businessId, serviceId, slotDate, startTime, endTime, maxCapaciity } =
+  const { businessId, serviceId, slotDate, startTime, endTime, maxCapacity } =
     await req.json();
 
   const business = await prisma.business.findFirst({
     where: { id: businessId, ownerId: session.id },
   });
 
-  if (!business)
-    return NextResponse.json(
-      { error: "Forbiden" },
-      {
-        status: 403,
-      },
-    );
+  if (!business) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const slot = await prisma.slot.create({
     data: {
@@ -67,7 +58,7 @@ export async function POST(req: Request) {
       slotDate: new Date(slotDate),
       startTime: new Date(`1970-01-01T${startTime}:00`),
       endTime: new Date(`1970-01-01T${endTime}:00`),
-      maxCapacity: maxCapaciity || 1,
+      maxCapacity: maxCapacity || 1,
     },
   });
   return NextResponse.json(slot, { status: 201 });
