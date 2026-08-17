@@ -36,7 +36,7 @@ export async function DELETE(
   const { id } = await params;
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
-    return NextResponse.json({ error: "Forbiden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const slot = await prisma.slot.findFirst({
@@ -50,7 +50,7 @@ export async function DELETE(
     );
   if (slot._count.bookings > 0) {
     return NextResponse.json(
-      { error: "Tidak bisa hapus sloy yang sudah ada booking" },
+      { error: "Tidak bisa hapus slot yang sudah ada booking" },
       { status: 400 },
     );
   }
