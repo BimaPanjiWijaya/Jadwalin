@@ -20,7 +20,7 @@ export async function POST(
   const formData = await req.formData();
   const file = formData.get("logo") as File | null;
   if (!file)
-    return NextResponse.json({ error: "File Wajib diupload" }, { status: 400 });
+    return NextResponse.json({ error: "File wajib diupload" }, { status: 400 });
   if (!file.type.startsWith("image/")) {
     return NextResponse.json(
       { error: "Hanya file gambar yang diizinkan" },

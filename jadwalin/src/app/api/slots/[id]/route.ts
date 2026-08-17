@@ -9,7 +9,7 @@ export async function PATCH(
   const { id } = await params;
   const session = await getSession();
   if (!session || session.role !== "BUSINESS_OWNER") {
-    return NextResponse.json({ error: "Forbiden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { status } = await req.json();
