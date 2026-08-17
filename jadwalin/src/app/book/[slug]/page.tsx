@@ -46,11 +46,16 @@ export default function BookPage({
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    params.then(({ slug }) => {
-      fetch(`/api/businesses/${slug}`)
-        .then((r) => r.json())
-        .then(setBusiness);
-    });
+    (async () => {
+      try {
+        const { slug } = await params;
+        const res = await fetch(`/api/businesses/${slug}`);
+        const data = await res.json();
+        setBusiness(data);
+      } catch {
+        setError("Gagal memuat data bisnis");
+      }
+    })();
   }, [params]);
 
   useEffect(() => {
@@ -67,7 +72,7 @@ export default function BookPage({
           setSlots([]);
           return;
         }
-        const arr = Array.isArray(json) ? json : json?.data ?? [];
+        const arr = Array.isArray(json) ? json : (json?.data ?? []);
         setSlots(arr);
       } catch {
         setError("Gagal terhubung ke server");
