@@ -23,13 +23,18 @@ export default function DashboardSlotsPage() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/businesses")
-      .then((r) => r.json())
-      .then((data: Business[]) => {
+    (async () => {
+      try {
+        const res = await fetch("/api/businesses?mine=1");
+        const data: Business[] = await res.json();
         if (data.length > 0) setBusiness(data[0]);
-      });
+      } catch {
+        setError("Gagal memuat data bisnis");
+      }
+    })();
   }, []);
 
   useEffect(() => {
