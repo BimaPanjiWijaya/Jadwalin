@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signToken } from "@/src/lib/jwt";
-import { error } from "console";
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
