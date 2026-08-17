@@ -2,14 +2,16 @@ const STATUS_STYLE: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800",
   CONFIRMED: "bg-green-100 text-green-800",
   CANCELLED: "bg-red-100 text-red-800",
-  DONE: "bg-gray-100 text-gray-600",
+  COMPLETED: "bg-gray-100 text-gray-600",
+  NO_SHOW: "bg-orange-100 text-orange-700",
 };
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "Menunggu",
   CONFIRMED: "Dikonfirmasi",
   CANCELLED: "Dibatalkan",
-  DONE: "Selesai",
+  COMPLETED: "Selesai",
+  NO_SHOW: "Tidak Hadir",
 };
 
 export default function BookingStatusBadge({ status }: { status: string }) {
