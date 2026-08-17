@@ -52,34 +52,55 @@ export default function DashboardSlotsPage() {
   }
 
   async function toggleBlock(slot: Slot) {
+    setError("");
     const newStatus = slot.status === "BLOCKED" ? "AVAILABLE" : "BLOCKED";
-    await fetch(`/api/slots/${slot.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-    fetchSlots();
+    try {
+      const res = await fetch(`/api/slots/${slot.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        setError(json?.error || "Gagal mengubah status slot");
+        return;
+      }
+      fetchSlots();
+    } catch {
+      setError("Gagal terhubung ke server");
+    }
   }
 
   async function handleGenerate(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!business) return;
     setLoading(true);
+    setError("");
     const fd = new FormData(e.currentTarget);
-    await fetch("/api/slots/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        businessId: business.id,
-        serviceId: fd.get("serviceId"),
-        date,
-        openTime: fd.get("openTime"),
-        closeTime: fd.get("closeTime"),
-        intervalMinutes: Number(fd.get("interval")),
-      }),
-    });
-    setLoading(false);
-    fetchSlots();
+    try {
+      const res = await fetch("/api/slots/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessId: business.id,
+          serviceId: fd.get("serviceId"),
+          date,
+          openTime: fd.get("openTime"),
+          closeTime: fd.get("closeTime"),
+          intervalMinutes: Number(fd.get("interval")),
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        setError(json?.error || "Gagal generate slot");
+        return;
+      }
+      fetchSlots();
+    } catch {
+      setError("Gagal terhubung ke server");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const formatTime = (isoTime: string) =>
@@ -91,6 +112,12 @@ export default function DashboardSlotsPage() {
   return (
     <main className="min-h-screen p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Kelola Slot</h1>
+
+      {error && (
+        <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Tanggal</label>
