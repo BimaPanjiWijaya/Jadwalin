@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
+import { getSession } from "@/src/lib/auth";
 
 export async function GET(
   req: Request,
@@ -30,7 +31,6 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const { getSession } = await import("@/src/lib/auth");
   const session = await getSession();
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
