@@ -23,7 +23,7 @@ export default async function MyBookingPage() {
     });
 
   const formatTime = (date: Date) =>
-    new Date(date).toLocaleDateString("id-ID", {
+    new Date(date).toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
     });
