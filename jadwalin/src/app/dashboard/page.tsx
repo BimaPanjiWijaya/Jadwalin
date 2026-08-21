@@ -96,6 +96,13 @@ export default async function DashboardPage() {
             Lihat Semua Booking
           </Link>
           <Link
+            href="/dashboard/settings"
+            className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Pengaturan
+          </Link>
+
+          <Link
             href="/dashboard/slots"
             className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
           >
