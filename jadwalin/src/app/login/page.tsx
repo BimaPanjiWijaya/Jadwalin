@@ -51,7 +51,7 @@ export default function LoginPage() {
       window.google.accounts.id.renderButton(googleBtnRef.current, {
         theme: "outline",
         size: "large",
-        width: "100%",
+        width: 384,
         text: "signin_with",
       });
     }
