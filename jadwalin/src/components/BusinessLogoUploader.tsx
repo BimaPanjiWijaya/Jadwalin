@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Props = {
-  businessId: String;
-  logoUrl: String | null;
-  businessName: String;
+  businessId: string;
+  logoUrl: string | null;
+  businessName: string;
 };
 
 export default function BusinessLogoUploader({
