@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import StatCard from "@/src/components/StatCard";
 import BookingStatusBadge from "@/src/components/BookingStatusBadge";
+import BusinessLogoUploader from "@/src/components/BusinessLogoUploader";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -72,11 +73,20 @@ export default async function DashboardPage() {
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{business.name}</h1>
-          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium capitalize">
-            {business.category}
-          </span>
+        <div className="flex items-center gap-4">
+          <BusinessLogoUploader
+            businessId={business.id}
+            logoUrl={business.logoUrl}
+            businessName={business.name}
+          />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {business.name}
+            </h1>
+            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium capitalize">
+              {business.category}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Link
