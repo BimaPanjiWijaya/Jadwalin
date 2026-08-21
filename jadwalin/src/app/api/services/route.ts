@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       const business = await prisma.business.findFirst({
         where: { id: businessId, ownerId: session.id },
       });
-      showInactive = !business;
+      showInactive = !!business;
     }
   }
   const services = await prisma.service.findMany({
