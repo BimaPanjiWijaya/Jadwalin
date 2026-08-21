@@ -101,6 +101,12 @@ export default async function DashboardPage() {
           >
             Pengaturan
           </Link>
+          <Link
+            href="/dashboard/services"
+            className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Kelola Layanan
+          </Link>
 
           <Link
             href="/dashboard/slots"
