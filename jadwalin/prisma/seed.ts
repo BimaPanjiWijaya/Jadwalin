@@ -44,14 +44,19 @@ async function main() {
     },
   });
 
-  const service = await prisma.service.create({
-    data: {
-      businessId: business.id,
-      name: "Potong rambut",
-      durationMinutes: 30,
-      price: 35000,
-    },
+  let service = await prisma.service.findFirst({
+    where: { businessId: business.id, name: "Potong rambut" },
   });
+  if (!service) {
+    service = await prisma.service.create({
+      data: {
+        businessId: business.id,
+        name: "Potong rambut",
+        durationMinutes: 30,
+        price: 35000,
+      },
+    });
+  }
 
   const today = new Date();
   const times = [
