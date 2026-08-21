@@ -39,18 +39,29 @@ export async function PATCH(
     where: { id },
   });
   if (!business || business.ownerId !== session.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const body = await req.json();
+  const { name, category, description, address, phone, waNumber } = body;
+
+  if (!name?.trim() || !category?.trim()) {
     return NextResponse.json(
-      { error: "Forbidden" },
-      {
-        status: 403,
-      },
+      { error: "Nama dan Kategori wajib diisi" },
+      { status: 400 },
     );
   }
 
-  const data = await req.json();
   const updated = await prisma.business.update({
     where: { id },
-    data,
+    data: {
+      name,
+      category,
+      description: description || null,
+      address: address || null,
+      phone: phone || null,
+      waNumber: waNumber || null,
+    },
   });
   return NextResponse.json(updated);
 }
