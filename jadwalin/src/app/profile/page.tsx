@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import BusinessLogoUploader from "@/src/components/BusinessLogoUploader";
 
 type User = {
   id: string;
@@ -10,8 +11,15 @@ type User = {
   telegramChatId: string | null;
 };
 
+type Business = {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+};
+
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
   const [chatId, setChatId] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -28,6 +36,17 @@ export default function ProfilePage() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (user?.role !== "BUSINESS_OWNER") return;
+    (async () => {
+      try {
+        const res = await fetch("/api/businesses?mine=1");
+        const data: Business[] = await res.json();
+        if (data.length > 0) setBusiness(data[0]);
+      } catch {}
+    })();
+  }, [user]);
 
   async function saveTelegram(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -82,6 +101,18 @@ export default function ProfilePage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Profil</h1>
 
       {/* Info akun */}
+      {/* Logo bisnis — cuma muncul kalau role BUSINESS_OWNER dan sudah punya bisnis */}
+      {business && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-4 shadow-sm">
+          <h2 className="font-semibold text-gray-900 mb-3">Logo Bisnis</h2>
+          <BusinessLogoUploader
+            businessId={business.id}
+            logoUrl={business.logoUrl}
+            businessName={business.name}
+          />
+        </div>
+      )}
+
       <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
